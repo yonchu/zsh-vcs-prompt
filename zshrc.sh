@@ -31,7 +31,8 @@ VCS_AHEAD_SIGIL="↑ "
 VCS_BEHIND_SIGIL="↓ "
 
 # color settings
-VCS_NAME_COLOR="%{%F{yellow}%}"
+VCS_NAME_COLOR="%{%B%F{yellow}%}"
+VCS_NAME_COLOR_USING_PYTHON="%{%F{yellow}%}"
 VCS_BRANCH_COLOR="%{%B%F{red}%}"
 VCS_ACTION_COLOR="%{%B%F{red}%}"
 VCS_REMOTE_COLOR=
@@ -96,7 +97,7 @@ function vcs_super_info() {
     if [ "$ZSH_VCS_PROMPT_USING_PYTHON" = 'true' ] \
         && type git > /dev/null 2>&1 \
         && [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
-        echo "(${VCS_NAME_COLOR}git%{${reset_color}%})-[$(_git_status_using_python)]"
+        echo "(${VCS_NAME_COLOR_USING_PYTHON}git%{${reset_color}%})-[$(_git_status_using_python)]"
         return 0
     fi
 
