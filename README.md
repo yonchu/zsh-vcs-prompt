@@ -21,9 +21,11 @@ $ mkdir ~/.zsh
 ```console
 $ cd ~/.zsh
 $ git clone git://github.com/yonchu/zsh-vcs-prompt.git
+
 ```
 
-3.Source the file ``zshrc.sh`` from your ``~/.zshrc`` config file, and, configure your prompt. So, somewhere in ``~/.zshrc``, you should have::
+
+3.Source the file ``zshrc.sh`` from your ``~/.zshrc`` config file, and, configure your prompt. So, somewhere in ``~/.zshrc``, you should have:
 
 ```bash
 source ~/zsh/zsh-vcs-prompt/zshrc.sh
