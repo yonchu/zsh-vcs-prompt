@@ -10,16 +10,21 @@ In particular the branch name, difference with remote branch, number of files st
 
 * Installation
 ---------------
-1. Create the directory ``~/.zsh`` if it does not exist (this location is customizable).
+1.Create the directory ``~/.zsh`` if it does not exist (this location is customizable).
+
 ```bash
 $ mkdir ~/.zsh
 ```
-1. Clone from github
+
+2.Clone from github
+
 ```console
 $ cd ~/.zsh
 $ git clone git://github.com/yonchu/zsh-vcs-prompt.git
 ```
-1. Source the file ``zshrc.sh`` from your ``~/.zshrc`` config file, and, configure your prompt. So, somewhere in ``~/.zshrc``, you should have::
+
+3.Source the file ``zshrc.sh`` from your ``~/.zshrc`` config file, and, configure your prompt. So, somewhere in ``~/.zshrc``, you should have::
+
 ```bash
 source ~/zsh/zsh-vcs-prompt/zshrc.sh
 RPROMPT='$(git_super_status)'
