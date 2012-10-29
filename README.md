@@ -8,7 +8,7 @@ In particular the branch name, difference with remote branch, number of files st
 ### Screenshot
 ![Screenshot](https://raw.github.com/yonchu/zsh-vcs-prompt/master/img/sample01.png)
 
-* Installation
+Installation
 ---------------
 1.Create the directory ``~/.zsh`` if it does not exist (this location is customizable).
 
@@ -29,7 +29,7 @@ $ git clone git://github.com/yonchu/zsh-vcs-prompt.git
 
 ```bash
 source ~/zsh/zsh-vcs-prompt/zshrc.sh
-RPROMPT='$(git_super_status)'
+RPROMPT='$(vcs_info)'
 ```
 
 ### Python or Shell scripts?
