@@ -40,7 +40,7 @@ VCS_STAGED_COLOR="%{%F{blue}%}"
 VCS_UNSTAGED_COLOR="%{%F{yellow}%}"
 VCS_UNTRACKED_COLOR=
 VCS_STASHED_COLOR="%{%F{cyan}%}"
-VCS_CLEAN_COLOR="%{%B%F{green}%}"
+VCS_CLEAN_COLOR="%{%F{green}%}"
 
 
 # Exe directory
