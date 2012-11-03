@@ -8,6 +8,17 @@ In particular the branch name, difference with remote branch, number of files st
 ### Screenshot
 ![Screenshot](https://raw.github.com/yonchu/zsh-vcs-prompt/master/img/sample01.png)
 
+Remote
+- ↑ : ahead
+- ↓ : behind
+
+Local
+- ✔ : repository clean
+- ● n: there are n staged files
+- ✖ n: there are n unmerged files
+- ✚ n: there are n changed but unstaged files
+- … n: there are n untracked files
+
 Installation
 ---------------
 1.Create the directory ``~/.zsh`` if it does not exist (this location is customizable).
