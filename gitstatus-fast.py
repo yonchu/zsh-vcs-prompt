@@ -61,7 +61,7 @@ else:
 import re
 
 remote = ''
-status = Popen(['git','status','-sb'], stdout=PIPE).communicate()[0].strip().splitlines()[0]
+status = Popen(['git','status', '--porcelain', '-b'], stdout=PIPE).communicate()[0].strip().splitlines()[0]
 status = re.search('(?<= \[).*(?=])', status)
 if status:
     ahead = re.search('(?<=ahead )\d*', status.group())

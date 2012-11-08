@@ -165,7 +165,7 @@ function _git_status() {
     fi
 
     # not pushed
-    local remote="$(git status -sb | command grep -PZo '(?<= \[).*(?=])')"
+    local remote="$(git status --porcelain -b | command grep -PZo '(?<= \[).*(?=])')"
     if [ -n "$remote" ];then
         local ahead_count="$(echo "$remote" | command grep -PZo '(?<=ahead )\d*')"
         if [ -n "$ahead_count" ];then
