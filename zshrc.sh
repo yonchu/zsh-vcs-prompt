@@ -106,7 +106,7 @@ function vcs_super_info() {
     LANG=en_US.UTF-8 vcs_info
 
     if [ "$vcs_info_msg_0_" = "git" ]; then
-        echo "(${VCS_NAME_COLOR}$vcs_info_msg_0_%{${reset_color}%})-[$(_git_status)]"
+        echo "(${VCS_NAME_COLOR}$vcs_info_msg_0_%{${reset_color}%})-[$(_git_status)]%{${reset_color}%}"
     else
         echo "${VCS_NAME_COLOR}$vcs_info_msg_0_%{${reset_color}%}"
     fi
@@ -126,8 +126,16 @@ function _git_status() {
 
     local conflicts_count=0
 
+    local is_inside_work_tree=false
+    if [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
+        is_inside_work_tree=true
+    fi
+
     # staged
-    local staged_files="$(git diff --staged --name-status)"
+    local staged_files
+    if [ "$is_inside_work_tree" = "true" ]; then
+        staged_files="$(git diff --staged --name-status)"
+    fi
     if [ -n "$staged_files" ];then
         conflicts_count=$(echo "$staged_files" | sed '/^[^U]/d' | wc -l | sed 's/ //g')
         staged_count=$(echo "$staged_files" | wc -l | sed 's/ //g')
@@ -149,14 +157,20 @@ function _git_status() {
     fi
 
     # unstaged
-    local unstaged_files="$(git diff --name-status)"
+    local unstaged_files
+    if [ "$is_inside_work_tree" = "true" ]; then
+        unstaged_files="$(git diff --name-status)"
+    fi
     if [ -n "$unstaged_files" ]; then
         unstaged_count=$(echo "$unstaged_files" | sed '/^U/d' | wc -l | sed 's/ //g')
         unstaged="$unstaged$unstaged_count%{${reset_color}%}"
     fi
 
     # untracked
-    untracked_files=$(git ls-files --others --exclude-standard)
+    local untracked_files
+    if [ "$is_inside_work_tree" = "true" ]; then
+        untracked_files=$(git ls-files --others --exclude-standard)
+    fi
     if [ -n "$untracked_files" ]; then
         untracked_count=$(echo "$untracked_files" | wc -l | sed 's/ //g')
         untracked="$untracked$untracked_count%{${reset_color}%}"
@@ -165,7 +179,10 @@ function _git_status() {
     fi
 
     # not pushed
-    local remote="$(git status --porcelain -b | command grep -PZo '(?<= \[).*(?=])')"
+    local remote
+    if [ "$is_inside_work_tree" = "true" ]; then
+        remote="$(git status --porcelain -b | command grep -PZo '(?<= \[).*(?=])')"
+    fi
     if [ -n "$remote" ];then
         local ahead_count="$(echo "$remote" | command grep -PZo '(?<=ahead )\d*')"
         if [ -n "$ahead_count" ];then
@@ -185,7 +202,10 @@ function _git_status() {
     fi
 
     # stash
-    local stash_list="$(git stash list)"
+    local stash_list
+    if [ "$is_inside_work_tree" = "true" ]; then
+        stash_list="$(git stash list)"
+    fi
     if [ -n "$stash_list" ]; then
         stashed_count=$(echo "$stash_list" | wc -l | sed 's/ //g')
         stashed="$stashed$stashed_count%{${reset_color}%}"
@@ -196,8 +216,10 @@ function _git_status() {
     # result
     local git_status="${branch}${ahead}${behind}|${staged}${unstaged}${untracked}${conflicts}${stashed}"
 
-    if [ -z "$staged" -a -z "$unstaged" -a -z "$untracked" -a -z "$conflicts" ]; then
-        git_status="${git_status}${clean}"
+    if [ "$is_inside_work_tree" = "true" ]; then
+        if [ -z "$staged" -a -z "$unstaged" -a -z "$untracked" -a -z "$conflicts" ]; then
+            git_status="${git_status}${clean}"
+        fi
     fi
 
     echo "$git_status%{${reset_color}%}"
