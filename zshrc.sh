@@ -20,28 +20,27 @@ fi
 # Configure at will.
 #
 # git status symbol
-VCS_SIGIL="∇ "
-VCS_STAGED_SIGIL="● "
-VCS_UNSTAGED_SIGIL="✚ "
-VCS_UNTRACKED_SIGIL="… "
-VCS_CONFLICTS_SIGIL="✖ "
-VCS_STASHED_SIGIL="⚑"
-VCS_CLEAN_SIGIL="✔ "
-VCS_AHEAD_SIGIL="↑ "
-VCS_BEHIND_SIGIL="↓ "
+VCS_SIGIL=${VCS_SIGIL:-"∇ "}
+VCS_STAGED_SIGIL=${VCS_STAGED_SIGIL:-"● "}
+VCS_UNSTAGED_SIGIL=${VCS_UNSTAGED_SIGIL:-"✚ "}
+VCS_UNTRACKED_SIGIL=${VCS_UNTRACKED_SIGIL:-"… "}
+VCS_CONFLICTS_SIGIL=${VCS_CONFLICTS_SIGIL:-"✖ "}
+VCS_STASHED_SIGIL=${VCS_STASHED_SIGIL:-"⚑"}
+VCS_CLEAN_SIGIL=${VCS_CLEAN_SIGIL:-"✔ "}
+VCS_AHEAD_SIGIL=${VCS_AHEAD_SIGIL:-"↑ "}
+VCS_BEHIND_SIGIL=${VCS_BEHIND_SIGIL:-"↓ "}
 
 # color settings
-VCS_NAME_COLOR="%{%B%F{yellow}%}"
-VCS_NAME_COLOR_USING_PYTHON="%{%F{yellow}%}"
-VCS_BRANCH_COLOR="%{%B%F{red}%}"
-VCS_ACTION_COLOR="%{%B%F{red}%}"
-VCS_REMOTE_COLOR=
-VCS_STAGED_COLOR="%{%F{blue}%}"
-VCS_UNSTAGED_COLOR="%{%F{yellow}%}"
-VCS_UNTRACKED_COLOR=
-VCS_STASHED_COLOR="%{%F{cyan}%}"
-VCS_CLEAN_COLOR="%{%F{green}%}"
-
+VCS_NAME_COLOR=${VCS_NAME_COLOR:-"%{%B%F{green}%}"}
+VCS_NAME_COLOR_USING_PYTHON=${VCS_NAME_COLOR_USING_PYTHON:-"%{%F{yellow}%}"}
+VCS_BRANCH_COLOR=${VCS_BRANCH_COLOR:-"%{%B%F{red}%}"}
+VCS_ACTION_COLOR=${VCS_ACTION_COLOR:-"%{%B%F{red}%}"}
+VCS_REMOTE_COLOR=${VCS_REMOTE_COLOR:-}
+VCS_STAGED_COLOR=${VCS_STAGED_COLOR:-"%{%F{blue}%}"}
+VCS_UNSTAGED_COLOR=${VCS_UNSTAGED_COLOR:-"%{%F{yellow}%}"}
+VCS_UNTRACKED_COLOR=${VCS_UNTRACKED_COLOR:-}
+VCS_STASHED_COLOR=${VCS_STASHED_COLOR:-"%{%F{cyan}%}"}
+VCS_CLEAN_COLOR=${VCS_CLEAN_COLOR:-"%{%F{green}%}"}
 
 # Exe directory
 ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
@@ -95,6 +94,7 @@ function vcs_super_info() {
     # カレントがgitレポジトリ下かどうか判定
     # zsh-git-prompt
     if [ "$ZSH_VCS_PROMPT_USING_PYTHON" = 'true' ] \
+        && type python > /dev/null 2>&1 \
         && type git > /dev/null 2>&1 \
         && [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
         echo "(${VCS_NAME_COLOR_USING_PYTHON}git%{${reset_color}%})-[$(_git_status_using_python)]"
