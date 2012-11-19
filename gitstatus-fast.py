@@ -33,7 +33,7 @@ def check_before_running():
 
 
 def main():
-    check_before_running()
+    #check_before_running()
 
     branch, error = Popen(['git', 'symbolic-ref', 'HEAD'],
                           stdout=PIPE, stderr=PIPE).communicate()
