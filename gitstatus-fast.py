@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# https://github.com/olivierverdier/zsh-git-prompt
+from __future__ import print_function
 
 import sys
+
 from subprocess import Popen, PIPE, \
     check_call, CalledProcessError
 
@@ -13,7 +14,7 @@ symbols = {'ahead of': '↑ ', 'behind': '↓ ', 'prehash ': ':'}
 
 def check_error(error):
     if error:
-        print >> sys.stderr, 'Error:', error.decode('utf-8')
+        print('Error:', error.decode('utf-8'), file=sys.stderr)
         sys.exit(1)
 
 
@@ -21,15 +22,13 @@ def check_before_running():
     try:
         check_call('type git >/dev/null 2>&1', shell=True)
     except CalledProcessError:
-        print >> sys.stderr, 'Error: Git is not installed'
-        sys.exit(1)
+        check_error('Error: Git is not installed')
 
     output, error = Popen(['git', 'rev-parse', '--is-inside-work-tree'],
                           stdout=PIPE, stderr=PIPE).communicate()
     check_error(error)
     if output == 'false':
-        print >> sys.stderr, 'Error: Not inside git work tree'
-        sys.exit(1)
+        check_error('Error: Not inside git work tree')
 
 
 def main():
@@ -107,7 +106,7 @@ def main():
         str(untracked),
         str(stashed),
         clean])
-    print out
+    print(out)
 
 
 if __name__ == '__main__':
