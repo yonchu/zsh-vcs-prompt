@@ -96,7 +96,7 @@ function vcs_super_info() {
         && type python > /dev/null 2>&1 \
         && type git > /dev/null 2>&1 \
         && [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
-        local git_status=$(_git_status_using_python)
+        local git_status="$(_git_status_using_python)"
         if [ -n "$git_status" ]; then
             echo "(${VCS_NAME_COLOR_USING_PYTHON}git%{${reset_color}%})-[${git_status}]"
             return 0
