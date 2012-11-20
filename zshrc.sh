@@ -20,27 +20,28 @@ fi
 # Configure at will.
 #
 # git status symbol
-VCS_SIGIL=${VCS_SIGIL:-"∇ "}
-VCS_STAGED_SIGIL=${VCS_STAGED_SIGIL:-"● "}
-VCS_UNSTAGED_SIGIL=${VCS_UNSTAGED_SIGIL:-"✚ "}
-VCS_UNTRACKED_SIGIL=${VCS_UNTRACKED_SIGIL:-"… "}
-VCS_CONFLICTS_SIGIL=${VCS_CONFLICTS_SIGIL:-"✖ "}
-VCS_STASHED_SIGIL=${VCS_STASHED_SIGIL:-"⚑"}
-VCS_CLEAN_SIGIL=${VCS_CLEAN_SIGIL:-"✔ "}
-VCS_AHEAD_SIGIL=${VCS_AHEAD_SIGIL:-"↑ "}
-VCS_BEHIND_SIGIL=${VCS_BEHIND_SIGIL:-"↓ "}
+VCS_SIGIL=${VCS_SIGIL:-'∇ '}
+VCS_ACTION_SEPARATOR=${VCS_ACTION_SEPARATOR:-':'}
+VCS_STAGED_SIGIL=${VCS_STAGED_SIGIL:-'● '}
+VCS_UNSTAGED_SIGIL=${VCS_UNSTAGED_SIGIL:-'✚ '}
+VCS_UNTRACKED_SIGIL=${VCS_UNTRACKED_SIGIL:-'… '}
+VCS_CONFLICTS_SIGIL=${VCS_CONFLICTS_SIGIL:-'✖ '}
+VCS_STASHED_SIGIL=${VCS_STASHED_SIGIL:-'⚑'}
+VCS_CLEAN_SIGIL=${VCS_CLEAN_SIGIL:-'✔ '}
+VCS_AHEAD_SIGIL=${VCS_AHEAD_SIGIL:-'↑ '}
+VCS_BEHIND_SIGIL=${VCS_BEHIND_SIGIL:-'↓ '}
 
 # color settings
-VCS_NAME_COLOR=${VCS_NAME_COLOR:-"%{%B%F{green}%}"}
-VCS_NAME_COLOR_USING_PYTHON=${VCS_NAME_COLOR_USING_PYTHON:-"%{%F{yellow}%}"}
-VCS_BRANCH_COLOR=${VCS_BRANCH_COLOR:-"%{%B%F{red}%}"}
-VCS_ACTION_COLOR=${VCS_ACTION_COLOR:-"%{%B%F{red}%}"}
+VCS_NAME_COLOR=${VCS_NAME_COLOR:-'%{%B%F{green}%}'}
+VCS_NAME_COLOR_USING_PYTHON=${VCS_NAME_COLOR_USING_PYTHON:-'%{%F{yellow}%}'}
+VCS_BRANCH_COLOR=${VCS_BRANCH_COLOR:-'%{%B%F{red}%}'}
+VCS_ACTION_COLOR=${VCS_ACTION_COLOR:-'%{%B%F{red}%}'}
 VCS_REMOTE_COLOR=${VCS_REMOTE_COLOR:-}
-VCS_STAGED_COLOR=${VCS_STAGED_COLOR:-"%{%F{blue}%}"}
-VCS_UNSTAGED_COLOR=${VCS_UNSTAGED_COLOR:-"%{%F{yellow}%}"}
+VCS_STAGED_COLOR=${VCS_STAGED_COLOR:-'%{%F{blue}%}'}
+VCS_UNSTAGED_COLOR=${VCS_UNSTAGED_COLOR:-'%{%F{yellow}%}'}
 VCS_UNTRACKED_COLOR=${VCS_UNTRACKED_COLOR:-}
-VCS_STASHED_COLOR=${VCS_STASHED_COLOR:-"%{%F{cyan}%}"}
-VCS_CLEAN_COLOR=${VCS_CLEAN_COLOR:-"%{%F{green}%}"}
+VCS_STASHED_COLOR=${VCS_STASHED_COLOR:-'%{%F{cyan}%}'}
+VCS_CLEAN_COLOR=${VCS_CLEAN_COLOR:-'%{%F{green}%}'}
 
 # Exe directory
 ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
@@ -83,10 +84,8 @@ autoload -Uz is-at-least
 if is-at-least 4.3.10; then
     # zshが4.3.10以上の場合
     zstyle ':vcs_info:git:*' check-for-changes true
-    zstyle ':vcs_info:git*:*' stagedstr "${VCS_STAGED_COLOR}${VCS_STAGED_SIGIL}"
-    zstyle ':vcs_info:git*:*' unstagedstr "${VCS_UNSTAGED_COLOR}${VCS_UNSTAGED_SIGIL}"
-    zstyle ':vcs_info:git:*' formats '%s' '${VCS_BRANCH_COLOR}%b%{${reset_color}%}' '%c' '%u'
-    zstyle ':vcs_info:git:*' actionformats '${VCS_NAME_COLOR}%s%{${reset_color}%}' '${VCS_BRANCH_COLOR}%b%{${reset_color}%}:${VCS_ACTION_COLOR}%a%{${reset_color}%}' '%c' '%u'
+    zstyle ':vcs_info:git:*' formats '%s' '%b'
+    zstyle ':vcs_info:git:*' actionformats '%s' '%b' '%a'
 fi
 
 
@@ -97,26 +96,33 @@ function vcs_super_info() {
         && type python > /dev/null 2>&1 \
         && type git > /dev/null 2>&1 \
         && [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
-        echo "(${VCS_NAME_COLOR_USING_PYTHON}git%{${reset_color}%})-[$(_git_status_using_python)]"
-        return 0
+        local git_status=$(_git_status_using_python)
+        if [ -n "$git_status" ]; then
+            echo "(${VCS_NAME_COLOR_USING_PYTHON}git%{${reset_color}%})-[${git_status}]"
+            return 0
+        fi
     fi
 
     # zsh-git-promptが使用できない場合
     psvar=()
     LANG=en_US.UTF-8 vcs_info
 
-    if [ "$vcs_info_msg_0_" = "git" ]; then
-        echo "(${VCS_NAME_COLOR}$vcs_info_msg_0_%{${reset_color}%})-[$(_git_status)]%{${reset_color}%}"
+    if [ "${vcs_info_msg_0_}" = 'git' ]; then
+        echo "(${VCS_NAME_COLOR}${vcs_info_msg_0_}%{${reset_color}%})-[$(_git_status)]%{${reset_color}%}"
     else
-        echo "${VCS_NAME_COLOR}$vcs_info_msg_0_%{${reset_color}%}"
+        echo "${VCS_NAME_COLOR}${vcs_info_msg_0_}%{${reset_color}%}"
     fi
+    return 0
 }
 
 
 function _git_status() {
-    local branch="$vcs_info_msg_1_"
-    local staged="$vcs_info_msg_2_"
-    local unstaged="$vcs_info_msg_3_"
+    local branch="${VCS_BRANCH_COLOR}${vcs_info_msg_1_}%{${reset_color}%}"
+    if [ -n "$vcs_info_msg_2_" ]; then
+        branch="$branch${VCS_ACTION_SEPARATOR}${VCS_ACTION_COLOR}${vcs_info_msg_2_}%{${reset_color}%}"
+    fi
+    local staged="${VCS_STAGED_COLOR}${VCS_STAGED_SIGIL}"
+    local unstaged="${VCS_UNSTAGED_COLOR}${VCS_UNSTAGED_SIGIL}"
     local untracked="${VCS_UNTRACKED_COLOR}${VCS_UNTRACKED_SIGIL}"
     local stashed="${VCS_STASHED_COLOR}${VCS_STASHED_SIGIL}"
     local conflicts="${VCS_CONFLICTS_COLOR}${VCS_CONFLICTS_SIGIL}"
@@ -138,22 +144,24 @@ function _git_status() {
     fi
     if [ -n "$staged_files" ];then
         conflicts_count=$(echo "$staged_files" | sed '/^[^U]/d' | wc -l | sed 's/ //g')
+
         staged_count=$(echo "$staged_files" | wc -l | sed 's/ //g')
         staged_count=$(($staged_count - $conflicts_count))
 
-        if [ -z "$staged" ];then
-            # stagedな新規ファイルがvcs_infoで検出されない
-            # (only Initial commit)
-            staged="${VCS_STAGED_COLOR}${VCS_STAGED_SIGIL}"
+        if [ "$staged_count" -gt 0 ]; then
+            staged="$staged$staged_count%{${reset_color}%}"
+        else
+            staged=''
         fi
-        staged="$staged$staged_count%{${reset_color}%}"
+    else
+        staged=''
     fi
 
     # conflicts
     if [ "$conflicts_count" -gt 0 ]; then
         conflicts="$conflicts$conflicts_count%{${reset_color}%}"
     else
-        conflicts=""
+        conflicts=''
     fi
 
     # unstaged
@@ -164,6 +172,8 @@ function _git_status() {
     if [ -n "$unstaged_files" ]; then
         unstaged_count=$(echo "$unstaged_files" | sed '/^U/d' | wc -l | sed 's/ //g')
         unstaged="$unstaged$unstaged_count%{${reset_color}%}"
+    else
+        unstaged=''
     fi
 
     # untracked
@@ -175,7 +185,7 @@ function _git_status() {
         untracked_count=$(echo "$untracked_files" | wc -l | sed 's/ //g')
         untracked="$untracked$untracked_count%{${reset_color}%}"
     else
-        untracked=""
+        untracked=''
     fi
 
     # not pushed
@@ -188,35 +198,35 @@ function _git_status() {
         if [ -n "$ahead_count" ];then
             ahead="$ahead$ahead_count%{${reset_color}%}"
         else
-            ahead=""
+            ahead=''
         fi
         local behind_count="$(echo "$remote" | command grep -PZo '(?<=behind )\d*')"
         if [ -n "$behind_count" ];then
             behind="$behind$behind_count%{${reset_color}%}"
         else
-            behind=""
+            behind=''
         fi
     else
-        ahead=""
-        behind=""
+        ahead=''
+        behind=''
     fi
 
     # stash
     local stash_list
-    if [ "$is_inside_work_tree" = "true" ]; then
+    if [ "$is_inside_work_tree" = 'true' ]; then
         stash_list="$(git stash list)"
     fi
     if [ -n "$stash_list" ]; then
         stashed_count=$(echo "$stash_list" | wc -l | sed 's/ //g')
         stashed="$stashed$stashed_count%{${reset_color}%}"
     else
-        stashed=""
+        stashed=''
     fi
 
     # result
     local git_status="${branch}${ahead}${behind}|${staged}${unstaged}${untracked}${conflicts}${stashed}"
 
-    if [ "$is_inside_work_tree" = "true" ]; then
+    if [ "$is_inside_work_tree" = 'true' ]; then
         if [ -z "$staged" -a -z "$unstaged" -a -z "$untracked" -a -z "$conflicts" ]; then
             git_status="${git_status}${clean}"
         fi
@@ -255,22 +265,22 @@ function _git_status_using_python() {
         STATUS="$STATUS$VCS_REMOTE_COLOR$GIT_REMOTE%{${reset_color}%}"
     fi
     STATUS="$STATUS|"
-    if [ "$GIT_STAGED" -ne "0" ]; then
+    if [ "$GIT_STAGED" -ne 0 ]; then
         STATUS="$STATUS$VCS_STAGED_COLOR$VCS_STAGED_SIGIL$GIT_STAGED%{${reset_color}%}"
     fi
-    if [ "$GIT_CONFLICTS" -ne "0" ]; then
+    if [ "$GIT_CONFLICTS" -ne 0 ]; then
         STATUS="$STATUS$VCS_CONFLICTS_COLOR$VCS_CONFLICTS_SIGIL$GIT_CONFLICTS%{${reset_color}%}"
     fi
-    if [ "$GIT_UNSTAGED" -ne "0" ]; then
+    if [ "$GIT_UNSTAGED" -ne 0 ]; then
         STATUS="$STATUS$VCS_UNSTAGED_COLOR$VCS_UNSTAGED_SIGIL$GIT_UNSTAGED%{${reset_color}%}"
     fi
-    if [ "$GIT_UNTRACKED" -ne "0" ]; then
+    if [ "$GIT_UNTRACKED" -ne 0 ]; then
         STATUS="$STATUS$VCS_UNTRACKED_COLOR$VCS_UNTRACKED_SIGIL$GIT_UNTRACKED%{${reset_color}%}"
     fi
-    if [ "$GIT_STASHED" -ne "0" ]; then
+    if [ "$GIT_STASHED" -ne 0 ]; then
         STATUS="$STATUS$VCS_STASHED_COLOR$VCS_STASHED_SIGIL$GIT_STASHED%{${reset_color}%}"
     fi
-    if [ "$GIT_CLEAN" -eq "1" ]; then
+    if [ "$GIT_CLEAN" -eq 1 ]; then
         STATUS="$STATUS$VCS_CLEAN_COLOR$VCS_CLEAN_SIGIL%{${reset_color}%}"
     fi
     STATUS="$STATUS%{${reset_color}%}"
