@@ -4,12 +4,19 @@
 from __future__ import print_function
 
 import sys
+import shlex
 
 from subprocess import Popen, PIPE, \
     check_call, CalledProcessError
 
-## change those symbols to whatever you prefer
-symbols = {'ahead of': '↑ ', 'behind': '↓ ', 'prehash ': ':'}
+
+def run_cmd(cmd):
+    cmd = shlex.split(cmd)
+    out, error = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
+    check_error(error)
+    if out:
+        return out.decode('utf-8')
+    return ''
 
 
 def check_error(error):
@@ -24,9 +31,7 @@ def check_before_running():
     except CalledProcessError:
         check_error('Error: Git is not installed')
 
-    output, error = Popen(['git', 'rev-parse', '--is-inside-work-tree'],
-                          stdout=PIPE, stderr=PIPE).communicate()
-    check_error(error)
+    output = run_cmd('git rev-parse --is-inside-work-tree')
     if output == 'false':
         check_error('Error: Not inside git work tree')
 
@@ -34,43 +39,28 @@ def check_before_running():
 def main():
     #check_before_running()
 
-    branch, error = Popen(['git', 'symbolic-ref', 'HEAD'],
-                          stdout=PIPE, stderr=PIPE).communicate()
-    check_error(error)
-    branch = branch.decode('utf-8')
+    branch = run_cmd('git symbolic-ref HEAD')
     branch = branch.strip()[11:]
 
     # unstaged
-    unstaged_files, error = Popen(
-        ['git', 'diff', '--name-status'],
-        stdout=PIPE, stderr=PIPE).communicate()
-    check_error(error)
+    unstaged_files = run_cmd('git diff --name-status')
     unstaged_files = [namestat[0] for namestat in unstaged_files.splitlines()]
     unstaged = len(unstaged_files) - unstaged_files.count('U')
 
     # staged
-    staged_files, error = Popen(
-        ['git', 'diff', '--staged', '--name-status'],
-        stdout=PIPE, stderr=PIPE).communicate()
-    check_error(error)
+    staged_files = run_cmd('git diff --staged --name-status')
     staged_files = [namestat[0] for namestat in staged_files.splitlines()]
     # conflicts
     conflicts = staged_files.count('U')
     staged = len(staged_files) - conflicts
 
     # untracked
-    untracked_files, error = Popen(
-        ['git', 'ls-files', '--others', '--exclude-standard'],
-        stdout=PIPE, stderr=PIPE).communicate()
-    check_error(error)
+    untracked_files = run_cmd('git ls-files --others --exclude-standard')
     untracked_files = untracked_files.splitlines()
     untracked = len(untracked_files)
 
     # stash
-    stash_list, error = Popen(
-        ['git', 'stash', 'list'],
-        stdout=PIPE, stderr=PIPE).communicate()
-    check_error(error)
+    stash_list = run_cmd('git stash list')
     stashed = len(stash_list.splitlines())
 
     # checking clean
@@ -81,26 +71,25 @@ def main():
 
     # remote
     import re
-    remote = ''
-    git_status, error = Popen(
-        ['git', 'status', '--porcelain', '-b'],
-        stdout=PIPE, stderr=PIPE).communicate()
-    check_error(error)
-    status = git_status.splitlines()[0].decode('utf-8')
+    remote_ahead = ''
+    remote_behind = ''
+    git_status = run_cmd('git status --porcelain -b')
+    status = git_status.splitlines()[0]
     status = re.search('(?<= \[).*(?=])', status)
     if status:
         ahead = re.search('(?<=ahead )\d*', status.group())
         if ahead:
-            remote += '%s%s' % (symbols['ahead of'], ahead.group())
+            remote_ahead = ahead.group()
 
         behind = re.search('(?<=behind )\d*', status.group())
         if behind:
-            remote += '%s%s' % (symbols['behind'], behind.group())
+            remote_behind = behind.group()
 
     # Result
     out = '\n'.join([
         branch,
-        remote,
+        remote_ahead,
+        remote_behind,
         str(staged),
         str(conflicts),
         str(unstaged),

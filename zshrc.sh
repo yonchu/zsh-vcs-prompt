@@ -243,26 +243,32 @@ function _git_status_using_python() {
         return 0
     fi
 
+    local GIT_STATUS
     GIT_STATUS=$(python "$cmd_gitstatus" 2>/dev/null)
     if [ -z "$GIT_STATUS" ];then
         return 0
     fi
 
+    local -a CURRENT_GIT_STATUS
     CURRENT_GIT_STATUS=("${(@f)GIT_STATUS}")
-    GIT_BRANCH=$CURRENT_GIT_STATUS[1]
-    GIT_REMOTE=$CURRENT_GIT_STATUS[2]
-    GIT_STAGED=$CURRENT_GIT_STATUS[3]
-    GIT_CONFLICTS=$CURRENT_GIT_STATUS[4]
-    GIT_UNSTAGED=$CURRENT_GIT_STATUS[5]
-    GIT_UNTRACKED=$CURRENT_GIT_STATUS[6]
-    GIT_STASHED=$CURRENT_GIT_STATUS[7]
-    GIT_CLEAN=$CURRENT_GIT_STATUS[8]
+    local GIT_BRANCH=${CURRENT_GIT_STATUS[1]}
+    local GIT_AHEAD=${CURRENT_GIT_STATUS[2]}
+    local GIT_BEHIND=${CURRENT_GIT_STATUS[3]}
+    local GIT_STAGED=${CURRENT_GIT_STATUS[4]}
+    local GIT_CONFLICTS=${CURRENT_GIT_STATUS[5]}
+    local GIT_UNSTAGED=${CURRENT_GIT_STATUS[6]}
+    local GIT_UNTRACKED=${CURRENT_GIT_STATUS[7]}
+    local GIT_STASHED=${CURRENT_GIT_STATUS[8]}
+    local GIT_CLEAN=${CURRENT_GIT_STATUS[9]}
 
 
     local STATUS="($GIT_BRANCH"
     STATUS="$VCS_BRANCH_COLOR$GIT_BRANCH%{${reset_color}%}"
-    if [ -n "$GIT_REMOTE" ]; then
-        STATUS="$STATUS$VCS_REMOTE_COLOR$GIT_REMOTE%{${reset_color}%}"
+    if [ -n "$GIT_AHEAD" ]; then
+        STATUS="$STATUS$VCS_REMOTE_COLOR$VCS_AHEAD_SIGIL$GIT_AHEAD%{${reset_color}%}"
+    fi
+    if [ -n "$GIT_BEHIND" ]; then
+        STATUS="$STATUS$VCS_REMOTE_COLOR$VCS_BEHIND_SIGIL$GIT_BEHIND%{${reset_color}%}"
     fi
     STATUS="$STATUS|"
     if [ "$GIT_STAGED" -ne 0 ]; then
