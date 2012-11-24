@@ -37,6 +37,7 @@ def main():
     branch, error = Popen(['git', 'symbolic-ref', 'HEAD'],
                           stdout=PIPE, stderr=PIPE).communicate()
     check_error(error)
+    branch = branch.decode('utf-8')
     branch = branch.strip()[11:]
 
     # unstaged
@@ -85,7 +86,7 @@ def main():
         ['git', 'status', '--porcelain', '-b'],
         stdout=PIPE, stderr=PIPE).communicate()
     check_error(error)
-    status = git_status.splitlines()[0]
+    status = git_status.splitlines()[0].decode('utf-8')
     status = re.search('(?<= \[).*(?=])', status)
     if status:
         ahead = re.search('(?<=ahead )\d*', status.group())
