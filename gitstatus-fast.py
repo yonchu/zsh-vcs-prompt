@@ -14,13 +14,13 @@ def run_cmd(cmd):
     cmd = shlex.split(cmd)
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     out, error = p.communicate()
-    check_error(p.returncode, error)
+    check_error(error, p.returncode)
     if out:
         return out.decode('utf-8')
     return ''
 
 
-def check_error(returncode, error):
+def check_error(error, returncode=1):
     if returncode == 0:
         return
     message = 'Unknown error'
@@ -34,12 +34,12 @@ def check_error(returncode, error):
 def check_before_running():
     try:
         check_call('type git >/dev/null 2>&1', shell=True)
-    except CalledProcessError:
-        check_error('Error: Git is not installed')
+    except CalledProcessError as e:
+        check_error('Git is not installed', e.returncode)
 
     output = run_cmd('git rev-parse --is-inside-work-tree')
     if output == 'false':
-        check_error('Error: Not inside git work tree')
+        check_error('Not inside git work tree')
 
 
 def main():
