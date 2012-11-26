@@ -12,17 +12,23 @@ from subprocess import Popen, PIPE, \
 
 def run_cmd(cmd):
     cmd = shlex.split(cmd)
-    out, error = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
-    check_error(error)
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    out, error = p.communicate()
+    check_error(p.returncode, error)
     if out:
         return out.decode('utf-8')
     return ''
 
 
-def check_error(error):
+def check_error(returncode, error):
+    if returncode == 0:
+        return
+    message = 'Unknown error'
     if error:
-        print('Error:', error.decode('utf-8'), file=sys.stderr)
-        sys.exit(1)
+        message = error.decode('utf-8')
+    message += '(%d)' % returncode
+    print('Error(%d):' % returncode, message, file=sys.stderr)
+    sys.exit(1)
 
 
 def check_before_running():
@@ -39,8 +45,8 @@ def check_before_running():
 def main():
     #check_before_running()
 
-    branch = run_cmd('git symbolic-ref HEAD')
-    branch = branch.strip()[11:]
+    # branch
+    branch = run_cmd('git symbolic-ref --short HEAD').strip()
 
     # unstaged
     unstaged_files = run_cmd('git diff --name-status')
