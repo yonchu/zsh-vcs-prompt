@@ -24,29 +24,28 @@
 ZSH_VCS_PROMPT_USING_PYTHON=${ZSH_VCS_PROMPT_USING_PYTHON:-'true'}
 
 ## The symbols.
-VCS_SIGIL=${VCS_SIGIL:-'∇ '}
-VCS_ACTION_SEPARATOR=${VCS_ACTION_SEPARATOR:-':'}
-VCS_STAGED_SIGIL=${VCS_STAGED_SIGIL:-'● '}
-VCS_UNSTAGED_SIGIL=${VCS_UNSTAGED_SIGIL:-'✚ '}
-VCS_UNTRACKED_SIGIL=${VCS_UNTRACKED_SIGIL:-'… '}
-VCS_CONFLICTS_SIGIL=${VCS_CONFLICTS_SIGIL:-'✖ '}
-VCS_STASHED_SIGIL=${VCS_STASHED_SIGIL:-'⚑'}
-VCS_CLEAN_SIGIL=${VCS_CLEAN_SIGIL:-'✔ '}
-VCS_AHEAD_SIGIL=${VCS_AHEAD_SIGIL:-'↑ '}
-VCS_BEHIND_SIGIL=${VCS_BEHIND_SIGIL:-'↓ '}
+ZSH_VCS_PROMPT_AHEAD_SIGIL=${ZSH_VCS_PROMPT_AHEAD_SIGIL:-'↑ '}
+ZSH_VCS_PROMPT_BEHIND_SIGIL=${ZSH_VCS_PROMPT_BEHIND_SIGIL:-'↓ '}
+ZSH_VCS_PROMPT_STAGED_SIGIL=${ZSH_VCS_PROMPT_STAGED_SIGIL:-'● '}
+ZSH_VCS_PROMPT_CONFLICTS_SIGIL=${ZSH_VCS_PROMPT_CONFLICTS_SIGIL:-'✖ '}
+ZSH_VCS_PROMPT_UNSTAGED_SIGIL=${ZSH_VCS_PROMPT_UNSTAGED_SIGIL:-'✚ '}
+ZSH_VCS_PROMPT_UNTRACKED_SIGIL=${ZSH_VCS_PROMPT_UNTRACKED_SIGIL:-'… '}
+ZSH_VCS_PROMPT_STASHED_SIGIL=${ZSH_VCS_PROMPT_STASHED_SIGIL:-'⚑'}
+ZSH_VCS_PROMPT_CLEAN_SIGIL=${ZSH_VCS_PROMPT_CLEAN_SIGIL:-'✔ '}
 
 ## Color settings.
-VCS_NAME_COLOR=${VCS_NAME_COLOR:-'%{%B%F{green}%}'}
-VCS_NAME_COLOR_USING_PYTHON=${VCS_NAME_COLOR_USING_PYTHON:-'%{%F{yellow}%}'}
-VCS_BRANCH_COLOR=${VCS_BRANCH_COLOR:-'%{%B%F{red}%}'}
-VCS_ACTION_COLOR=${VCS_ACTION_COLOR:-'%{%B%F{red}%}'}
-VCS_REMOTE_COLOR=${VCS_REMOTE_COLOR:-}
-VCS_STAGED_COLOR=${VCS_STAGED_COLOR:-'%{%F{blue}%}'}
-VCS_UNSTAGED_COLOR=${VCS_UNSTAGED_COLOR:-'%{%F{yellow}%}'}
-VCS_UNTRACKED_COLOR=${VCS_UNTRACKED_COLOR:-}
-VCS_CONFLICTS_COLOR=${VCS_CONFLICTS_COLOR:-'%{%F{red}%}'}
-VCS_STASHED_COLOR=${VCS_STASHED_COLOR:-'%{%F{cyan}%}'}
-VCS_CLEAN_COLOR=${VCS_CLEAN_COLOR:-'%{%F{green}%}'}
+ZSH_VCS_PROMPT_VCS_NAME_COLOR=${ZSH_VCS_PROMPT_VCS_NAME_COLOR:-'%{%B%F{green}%}'}
+ZSH_VCS_PROMPT_VCS_NAME_COLOR_USING_PYTHON=${ZSH_VCS_PROMPT_VCS_NAME_COLOR_USING_PYTHON:-'%{%F{yellow}%}'}
+ZSH_VCS_PROMPT_BRANCH_COLOR=${ZSH_VCS_PROMPT_BRANCH_COLOR:-'%{%B%F{red}%}'}
+ZSH_VCS_PROMPT_ACTION_COLOR=${ZSH_VCS_PROMPT_ACTION_COLOR:-'%{%B%F{red}%}'}
+ZSH_VCS_PROMPT_AHEAD_COLOR=${ZSH_VCS_PROMPT_AHEAD_COLOR:-}
+ZSH_VCS_PROMPT_BEHIND_COLOR=${ZSH_VCS_PROMPT_BEHIND_COLOR:-}
+ZSH_VCS_PROMPT_STAGED_COLOR=${ZSH_VCS_PROMPT_STAGED_COLOR:-'%{%F{blue}%}'}
+ZSH_VCS_PROMPT_CONFLICTS_COLOR=${ZSH_VCS_PROMPT_CONFLICTS_COLOR:-'%{%F{red}%}'}
+ZSH_VCS_PROMPT_UNSTAGED_COLOR=${ZSH_VCS_PROMPT_UNSTAGED_COLOR:-'%{%F{yellow}%}'}
+ZSH_VCS_PROMPT_UNTRACKED_COLOR=${ZSH_VCS_PROMPT_UNTRACKED_COLOR:-}
+ZSH_VCS_PROMPT_STASHED_COLOR=${ZSH_VCS_PROMPT_STASHED_COLOR:-'%{%F{cyan}%}'}
+ZSH_VCS_PROMPT_CLEAN_COLOR=${ZSH_VCS_PROMPT_CLEAN_COLOR:-'%{%F{green}%}'}
 
 
 # The exe directory.
@@ -104,7 +103,7 @@ function vcs_super_info() {
         && [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
         local git_status="$(_git_status_using_python)"
         if [ -n "$git_status" ]; then
-            echo "(${VCS_NAME_COLOR_USING_PYTHON}git%{${reset_color}%})-[${git_status}]"
+            echo "(${ZSH_VCS_PROMPT_NAME_COLOR_USING_PYTHON}git%{${reset_color}%})-[${git_status}]"
             return 0
         fi
     fi
@@ -114,27 +113,27 @@ function vcs_super_info() {
     LANG=en_US.UTF-8 vcs_info
 
     if [ "${vcs_info_msg_0_}" = 'git' ]; then
-        echo "(${VCS_NAME_COLOR}${vcs_info_msg_0_}%{${reset_color}%})-[$(_git_status)]%{${reset_color}%}"
+        echo "(${ZSH_VCS_PROMPT_VCS_NAME_COLOR}${vcs_info_msg_0_}%{${reset_color}%})-[$(_git_status)]%{${reset_color}%}"
     else
-        echo "${VCS_NAME_COLOR}${vcs_info_msg_0_}%{${reset_color}%}"
+        echo "${ZSH_VCS_PROMPT_VCS_NAME_COLOR}${vcs_info_msg_0_}%{${reset_color}%}"
     fi
     return 0
 }
 
 
 function _git_status() {
-    local branch="${VCS_BRANCH_COLOR}${vcs_info_msg_1_}%{${reset_color}%}"
+    local branch="${ZSH_VCS_PROMPT_BRANCH_COLOR}${vcs_info_msg_1_}%{${reset_color}%}"
     if [ -n "$vcs_info_msg_2_" ]; then
-        branch="$branch${VCS_ACTION_SEPARATOR}${VCS_ACTION_COLOR}${vcs_info_msg_2_}%{${reset_color}%}"
+        branch="$branch${ZSH_VCS_PROMPT_ACTION_SEPARATOR}${ZSH_VCS_PROMPT_ACTION_COLOR}${vcs_info_msg_2_}%{${reset_color}%}"
     fi
-    local staged="${VCS_STAGED_COLOR}${VCS_STAGED_SIGIL}"
-    local unstaged="${VCS_UNSTAGED_COLOR}${VCS_UNSTAGED_SIGIL}"
-    local untracked="${VCS_UNTRACKED_COLOR}${VCS_UNTRACKED_SIGIL}"
-    local stashed="${VCS_STASHED_COLOR}${VCS_STASHED_SIGIL}"
-    local conflicts="${VCS_CONFLICTS_COLOR}${VCS_CONFLICTS_SIGIL}"
-    local ahead="${VCS_REMOTE_COLOR}${VCS_AHEAD_SIGIL}"
-    local behind="${VCS_REMOTE_COLOR}${VCS_BEHIND_SIGIL}"
-    local clean="${VCS_CLEAN_COLOR}${VCS_CLEAN_SIGIL}%{${reset_color}%}"
+    local staged="${ZSH_VCS_PROMPT_STAGED_COLOR}${ZSH_VCS_PROMPT_STAGED_SIGIL}"
+    local unstaged="${ZSH_VCS_PROMPT_UNSTAGED_COLOR}${ZSH_VCS_PROMPT_UNSTAGED_SIGIL}"
+    local untracked="${ZSH_VCS_PROMPT_UNTRACKED_COLOR}${ZSH_VCS_PROMPT_UNTRACKED_SIGIL}"
+    local stashed="${ZSH_VCS_PROMPT_STASHED_COLOR}${ZSH_VCS_PROMPT_STASHED_SIGIL}"
+    local conflicts="${ZSH_VCS_PROMPT_CONFLICTS_COLOR}${ZSH_VCS_PROMPT_CONFLICTS_SIGIL}"
+    local ahead="${ZSH_VCS_PROMPT_AHEAD_COLOR}${ZSH_VCS_PROMPT_AHEAD_SIGIL}"
+    local behind="${ZSH_VCS_PROMPT_BEHIND_COLOR}${ZSH_VCS_PROMPT_BEHIND_SIGIL}"
+    local clean="${ZSH_VCS_PROMPT_CLEAN_COLOR}${ZSH_VCS_PROMPT_CLEAN_SIGIL}%{${reset_color}%}"
 
     local conflicts_count=0
 
@@ -269,31 +268,31 @@ function _git_status_using_python() {
 
 
     local STATUS="($GIT_BRANCH"
-    STATUS="$VCS_BRANCH_COLOR$GIT_BRANCH%{${reset_color}%}"
+    STATUS="$ZSH_VCS_PROMPT_BRANCH_COLOR$GIT_BRANCH%{${reset_color}%}"
     if [ "$GIT_AHEAD" -ne 0 ]; then
-        STATUS="$STATUS$VCS_REMOTE_COLOR$VCS_AHEAD_SIGIL$GIT_AHEAD%{${reset_color}%}"
+        STATUS="$STATUS$ZSH_VCS_PROMPT_AHEAD_COLOR$ZSH_VCS_PROMPT_AHEAD_SIGIL$GIT_AHEAD%{${reset_color}%}"
     fi
     if [ "$GIT_BEHIND" -ne 0 ]; then
-        STATUS="$STATUS$VCS_REMOTE_COLOR$VCS_BEHIND_SIGIL$GIT_BEHIND%{${reset_color}%}"
+        STATUS="$STATUS$ZSH_VCS_PROMPT_BEHIND_COLOR$ZSH_VCS_PROMPT_BEHIND_SIGIL$GIT_BEHIND%{${reset_color}%}"
     fi
     STATUS="$STATUS|"
     if [ "$GIT_STAGED" -ne 0 ]; then
-        STATUS="$STATUS$VCS_STAGED_COLOR$VCS_STAGED_SIGIL$GIT_STAGED%{${reset_color}%}"
+        STATUS="$STATUS$ZSH_VCS_PROMPT_STAGED_COLOR$ZSH_VCS_PROMPT_STAGED_SIGIL$GIT_STAGED%{${reset_color}%}"
     fi
     if [ "$GIT_CONFLICTS" -ne 0 ]; then
-        STATUS="$STATUS$VCS_CONFLICTS_COLOR$VCS_CONFLICTS_SIGIL$GIT_CONFLICTS%{${reset_color}%}"
+        STATUS="$STATUS$ZSH_VCS_PROMPT_CONFLICTS_COLOR$ZSH_VCS_PROMPT_CONFLICTS_SIGIL$GIT_CONFLICTS%{${reset_color}%}"
     fi
     if [ "$GIT_UNSTAGED" -ne 0 ]; then
-        STATUS="$STATUS$VCS_UNSTAGED_COLOR$VCS_UNSTAGED_SIGIL$GIT_UNSTAGED%{${reset_color}%}"
+        STATUS="$STATUS$ZSH_VCS_PROMPT_UNSTAGED_COLOR$ZSH_VCS_PROMPT_UNSTAGED_SIGIL$GIT_UNSTAGED%{${reset_color}%}"
     fi
     if [ "$GIT_UNTRACKED" -ne 0 ]; then
-        STATUS="$STATUS$VCS_UNTRACKED_COLOR$VCS_UNTRACKED_SIGIL$GIT_UNTRACKED%{${reset_color}%}"
+        STATUS="$STATUS$ZSH_VCS_PROMPT_UNTRACKED_COLOR$ZSH_VCS_PROMPT_UNTRACKED_SIGIL$GIT_UNTRACKED%{${reset_color}%}"
     fi
     if [ "$GIT_STASHED" -ne 0 ]; then
-        STATUS="$STATUS$VCS_STASHED_COLOR$VCS_STASHED_SIGIL$GIT_STASHED%{${reset_color}%}"
+        STATUS="$STATUS$ZSH_VCS_PROMPT_STASHED_COLOR$ZSH_VCS_PROMPT_STASHED_SIGIL$GIT_STASHED%{${reset_color}%}"
     fi
     if [ "$GIT_CLEAN" -eq 1 ]; then
-        STATUS="$STATUS$VCS_CLEAN_COLOR$VCS_CLEAN_SIGIL%{${reset_color}%}"
+        STATUS="$STATUS$ZSH_VCS_PROMPT_CLEAN_COLOR$ZSH_VCS_PROMPT_CLEAN_SIGIL%{${reset_color}%}"
     fi
     STATUS="$STATUS%{${reset_color}%}"
     echo "$STATUS"
