@@ -21,9 +21,7 @@
 #
 
 ## Use the python script (gitstatus-fast.py) by default.
-if [ -z "$ZSH_VCS_PROMPT_USING_PYTHON" ];then
-    ZSH_VCS_PROMPT_USING_PYTHON='true'
-fi
+ZSH_VCS_PROMPT_USING_PYTHON=${ZSH_VCS_PROMPT_USING_PYTHON:-'true'}
 
 ## The symbols.
 VCS_SIGIL=${VCS_SIGIL:-'∇ '}
