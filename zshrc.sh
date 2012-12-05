@@ -64,11 +64,11 @@ autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git svn hg bzr
 
 # The maximum number of vcs_info_msg_*_ variables.
-zstyle ':vcs_info:*' max-exports 7
+zstyle ':vcs_info:*' max-exports 5
 
 # To be enable check-for-changes with hg.
 zstyle ':vcs_info:hg:*' get-revision true
-zstyle ':vcs_info:hg:*' use-simple true
+zstyle ':vcs_info:(hg|bzr):*' use-simple true
 
 #
 # In normal formats and actionformats the following replacements are done:
@@ -81,16 +81,13 @@ zstyle ':vcs_info:hg:*' use-simple true
 #
 
 # Set formats. (put the data into vcs_info_msg_*_ variables)
-zstyle ':vcs_info:*' formats '(%s)-[%b]'
-zstyle ':vcs_info:*' actionformats '(%s)-[%b|%a]'
-zstyle ':vcs_info:(svn|bzr):*' branchformat '%b:%r'
+zstyle ':vcs_info:*' formats '%s' '%b'
+zstyle ':vcs_info:*' actionformats '%s' '%b' '%a'
 
 autoload -Uz is-at-least
 if is-at-least 4.3.10; then
     # In the case of zsh version >= 4.3.10.
-    zstyle ':vcs_info:git:*' check-for-changes true
-    zstyle ':vcs_info:git:*' formats '%s' '%b'
-    zstyle ':vcs_info:git:*' actionformats '%s' '%b' '%a'
+    zstyle ':vcs_info:(git|hg):*' check-for-changes true
 fi
 
 
@@ -111,11 +108,16 @@ function vcs_super_info() {
     # Don't use python.
     psvar=()
     LANG=en_US.UTF-8 vcs_info
+    if [ -z "$vcs_info_msg_0_" ]; then
+        return 0
+    fi
 
     if [ "${vcs_info_msg_0_}" = 'git' ]; then
         echo "(${ZSH_VCS_PROMPT_VCS_NAME_COLOR}${vcs_info_msg_0_}%{${reset_color}%})-[$(_git_status)]%{${reset_color}%}"
     else
-        echo "${ZSH_VCS_PROMPT_VCS_NAME_COLOR}${vcs_info_msg_0_}%{${reset_color}%}"
+        echo "(${ZSH_VCS_PROMPT_VCS_NAME_COLOR}${vcs_info_msg_0_}%{${reset_color}%})
+            -[$ZSH_VCS_PROMPT_BRANCH_COLOR$vcs_info_msg_1_%{${reset_color}%}
+            ${vcs_info_msg_2_:+$ZSH_VCS_PROMPT_ACTION_SEPARATOR}$ZSH_VCS_PROMPT_ACTION_COLOR$vcs_info_msg_2_%{${reset_color}%}]"
     fi
     return 0
 }
