@@ -190,26 +190,26 @@ function _git_status() {
     fi
 
     # not pushed
-    local remote
-    if [ "$is_inside_work_tree" = "true" ]; then
-        remote="$(git status --porcelain -b | command grep -PZo '(?<= \[).*(?=])')"
-    fi
-    if [ -n "$remote" ];then
-        local ahead_count="$(echo "$remote" | command grep -PZo '(?<=ahead )\d*')"
-        if [ -n "$ahead_count" ];then
-            ahead="$ahead$ahead_count%{${reset_color}%}"
-        else
-            ahead=''
-        fi
-        local behind_count="$(echo "$remote" | command grep -PZo '(?<=behind )\d*')"
-        if [ -n "$behind_count" ];then
+    local tracking_branch=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
+    if [ -n "$tracking_branch" ]; then
+        local -a behind_ahead
+        behind_ahead=($(git rev-list --left-right --count $tracking_branch...HEAD))
+        local behind_count=${behind_ahead[1]}
+        local ahead_count=${behind_ahead[2]}
+
+        if [[ $behind_count -gt 0 ]]; then
             behind="$behind$behind_count%{${reset_color}%}"
         else
             behind=''
         fi
+        if [[ $ahead_count -gt 0 ]]; then
+            ahead="$ahead$ahead_count%{${reset_color}%}"
+        else
+            ahead=''
+        fi
     else
-        ahead=''
         behind=''
+        ahead=''
     fi
 
     # stash
