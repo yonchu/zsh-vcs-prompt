@@ -189,7 +189,7 @@ function _git_status() {
     fi
 
     # not pushed
-    local tracking_branch=$(git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD))
+    local tracking_branch=$(git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref -q HEAD)" 2> /dev/null)
     if [ -n "$tracking_branch" ]; then
         local -a behind_ahead
         behind_ahead=($(git rev-list --left-right --count $tracking_branch...HEAD))
