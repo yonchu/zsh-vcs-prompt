@@ -77,8 +77,8 @@ def main():
 
     # remote
     import re
-    remote_ahead = ''
-    remote_behind = ''
+    remote_ahead = '0'
+    remote_behind = '0'
     git_status = run_cmd('git status --porcelain -b')
     status = git_status.splitlines()[0]
     status = re.search('(?<= \[).*(?=])', status)

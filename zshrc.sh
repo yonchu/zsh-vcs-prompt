@@ -264,10 +264,10 @@ function _git_status_using_python() {
 
     local STATUS="($GIT_BRANCH"
     STATUS="$VCS_BRANCH_COLOR$GIT_BRANCH%{${reset_color}%}"
-    if [ -n "$GIT_AHEAD" ]; then
+    if [ "$GIT_AHEAD" -ne 0 ]; then
         STATUS="$STATUS$VCS_REMOTE_COLOR$VCS_AHEAD_SIGIL$GIT_AHEAD%{${reset_color}%}"
     fi
-    if [ -n "$GIT_BEHIND" ]; then
+    if [ "$GIT_BEHIND" -ne 0 ]; then
         STATUS="$STATUS$VCS_REMOTE_COLOR$VCS_BEHIND_SIGIL$GIT_BEHIND%{${reset_color}%}"
     fi
     STATUS="$STATUS|"
