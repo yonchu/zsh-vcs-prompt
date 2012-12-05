@@ -40,7 +40,7 @@ $ git clone git://github.com/yonchu/zsh-vcs-prompt.git
 
 ```bash
 source ~/zsh/zsh-vcs-prompt/zshrc.sh
-RPROMPT='$(vcs_info)'
+RPROMPT='$(vcs_super_info)'
 ```
 
 ### Python or Shell scripts?

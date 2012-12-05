@@ -6,7 +6,7 @@
 #     source path/to/zshrc.sh
 #
 #     # an example prompt
-#     RPROMPT='$(vcs_info)'
+#     RPROMPT='$(vcs_super_info)'
 #
 ###############################################################################
 
