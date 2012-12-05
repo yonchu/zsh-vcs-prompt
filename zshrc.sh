@@ -59,15 +59,15 @@ ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
 autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git svn hg bzr
 
-# formatsのプレースホルダの最大値
+# The maximum number of vcs_info_msg_*_ variables.
 zstyle ':vcs_info:*' max-exports 7
 
-# hg で check-for-changes を有効にするために必要
+# To be enable check-for-changes with hg
 zstyle ':vcs_info:hg:*' get-revision true
 zstyle ':vcs_info:hg:*' use-simple true
 
 #
-# フォーマットに指定できる変数
+# In normal formats and actionformats the following replacements are done:
 #   %s : The VCS in use (git, hg, svn, etc.).
 #   %b : Information about the current branch.
 #   %a : An identifier that describes the action. Only makes sense in actionformats.
@@ -76,14 +76,14 @@ zstyle ':vcs_info:hg:*' use-simple true
 #   %u : The string from the unstagedstr style if there are unstaged changes in the repository.
 #
 
-# 左から順番に、vcs_info_msg_{n}_ という変数に格納される
+# Set formats. (put the data into vcs_info_msg_*_ variables)
 zstyle ':vcs_info:*' formats '(%s)-[%b]'
 zstyle ':vcs_info:*' actionformats '(%s)-[%b|%a]'
 zstyle ':vcs_info:(svn|bzr):*' branchformat '%b:%r'
 
 autoload -Uz is-at-least
 if is-at-least 4.3.10; then
-    # zshが4.3.10以上の場合
+    # In the case of zsh version >= 4.3.10
     zstyle ':vcs_info:git:*' check-for-changes true
     zstyle ':vcs_info:git:*' formats '%s' '%b'
     zstyle ':vcs_info:git:*' actionformats '%s' '%b' '%a'
@@ -91,8 +91,7 @@ fi
 
 
 function vcs_super_info() {
-    # カレントがgitレポジトリ下かどうか判定
-    # zsh-git-prompt
+    # Use python
     if [ "$ZSH_VCS_PROMPT_USING_PYTHON" = 'true' ] \
         && type python > /dev/null 2>&1 \
         && type git > /dev/null 2>&1 \
@@ -104,7 +103,7 @@ function vcs_super_info() {
         fi
     fi
 
-    # zsh-git-promptが使用できない場合
+    # Don't use python.
     psvar=()
     LANG=en_US.UTF-8 vcs_info
 
