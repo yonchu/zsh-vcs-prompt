@@ -196,12 +196,12 @@ function _git_status() {
         local behind_count=${behind_ahead[1]}
         local ahead_count=${behind_ahead[2]}
 
-        if [[ $behind_count -gt 0 ]]; then
+        if [ "$behind_count" -gt 0 ]; then
             behind="$behind$behind_count%{${reset_color}%}"
         else
             behind=''
         fi
-        if [[ $ahead_count -gt 0 ]]; then
+        if [ "$ahead_count" -gt 0 ]; then
             ahead="$ahead$ahead_count%{${reset_color}%}"
         else
             ahead=''
