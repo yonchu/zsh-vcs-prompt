@@ -2,24 +2,30 @@
 #
 #  VCS INFO
 #
-#  How to install
-#     source path/to/zshrc.sh
+#  How to install:
 #
-#     # an example prompt
-#     RPROMPT='$(vcs_super_info)'
+#    1.Source this file in your .zshrc.
+#      # e.g.
+#      source ~/.zsh/zsh-vcs-prompt/zshrc.sh
+#
+#    2.Add the following in your .zshrc:
+#      # e.g.
+#      RPROMPT='$(vcs_super_info)'
 #
 ###############################################################################
 
-# Using python script (gitstatus.py)
+### Set default values.
+#
+#  If you want to customize the appearance of the prompt,
+#  try to change the values in the following variables in your zshrc file.
+#
+
+## Use the python script (gitstatus-fast.py) by default.
 if [ -z "$ZSH_VCS_PROMPT_USING_PYTHON" ];then
     ZSH_VCS_PROMPT_USING_PYTHON='true'
 fi
 
-#
-# Default values for the appearance of the prompt.
-# Configure at will.
-#
-# git status symbol
+## The symbols.
 VCS_SIGIL=${VCS_SIGIL:-'∇ '}
 VCS_ACTION_SEPARATOR=${VCS_ACTION_SEPARATOR:-':'}
 VCS_STAGED_SIGIL=${VCS_STAGED_SIGIL:-'● '}
@@ -31,7 +37,7 @@ VCS_CLEAN_SIGIL=${VCS_CLEAN_SIGIL:-'✔ '}
 VCS_AHEAD_SIGIL=${VCS_AHEAD_SIGIL:-'↑ '}
 VCS_BEHIND_SIGIL=${VCS_BEHIND_SIGIL:-'↓ '}
 
-# color settings
+## Color settings.
 VCS_NAME_COLOR=${VCS_NAME_COLOR:-'%{%B%F{green}%}'}
 VCS_NAME_COLOR_USING_PYTHON=${VCS_NAME_COLOR_USING_PYTHON:-'%{%F{yellow}%}'}
 VCS_BRANCH_COLOR=${VCS_BRANCH_COLOR:-'%{%B%F{red}%}'}
@@ -44,7 +50,8 @@ VCS_CONFLICTS_COLOR=${VCS_CONFLICTS_COLOR:-'%{%F{red}%}'}
 VCS_STASHED_COLOR=${VCS_STASHED_COLOR:-'%{%F{cyan}%}'}
 VCS_CLEAN_COLOR=${VCS_CLEAN_COLOR:-'%{%F{green}%}'}
 
-# Exe directory
+
+# The exe directory.
 ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
 
 #
@@ -62,7 +69,7 @@ zstyle ':vcs_info:*' enable git svn hg bzr
 # The maximum number of vcs_info_msg_*_ variables.
 zstyle ':vcs_info:*' max-exports 7
 
-# To be enable check-for-changes with hg
+# To be enable check-for-changes with hg.
 zstyle ':vcs_info:hg:*' get-revision true
 zstyle ':vcs_info:hg:*' use-simple true
 
@@ -83,13 +90,14 @@ zstyle ':vcs_info:(svn|bzr):*' branchformat '%b:%r'
 
 autoload -Uz is-at-least
 if is-at-least 4.3.10; then
-    # In the case of zsh version >= 4.3.10
+    # In the case of zsh version >= 4.3.10.
     zstyle ':vcs_info:git:*' check-for-changes true
     zstyle ':vcs_info:git:*' formats '%s' '%b'
     zstyle ':vcs_info:git:*' actionformats '%s' '%b' '%a'
 fi
 
 
+# The function called in PROMPT or RPROMPT.
 function vcs_super_info() {
     # Use python
     if [ "$ZSH_VCS_PROMPT_USING_PYTHON" = 'true' ] \
