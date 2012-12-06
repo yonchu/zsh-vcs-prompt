@@ -10,13 +10,17 @@ from subprocess import Popen, PIPE, \
     check_call, CalledProcessError
 
 
-def run_cmd(cmd):
+def run_cmd(cmd, ignore_error=False):
     cmd = shlex.split(cmd)
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     out, error = p.communicate()
-    check_error(error, p.returncode)
+    if not ignore_error:
+        check_error(error, p.returncode)
     if out:
-        return out.decode('utf-8')
+        if isinstance(out, bytes):
+            out = out.decode('utf-8')
+        return str(out)
+
     return ''
 
 
@@ -25,7 +29,9 @@ def check_error(error, returncode=1):
         return
     message = 'Unknown error'
     if error:
-        message = error.decode('utf-8')
+        if isinstance(error, bytes):
+            error = error.decode('utf-8')
+        message = str(error)
     message += '(%d)' % returncode
     print('Error(%d):' % returncode, message, file=sys.stderr)
     sys.exit(1)
@@ -76,26 +82,22 @@ def main():
         clean = '0'
 
     # remote
-    import re
-    remote_ahead = '0'
-    remote_behind = '0'
-    git_status = run_cmd('git status --porcelain -b')
-    status = git_status.splitlines()[0]
-    status = re.search('(?<= \[).*(?=])', status)
-    if status:
-        ahead = re.search('(?<=ahead )\d*', status.group())
-        if ahead:
-            remote_ahead = ahead.group()
-
-        behind = re.search('(?<=behind )\d*', status.group())
-        if behind:
-            remote_behind = behind.group()
+    ahead = '0'
+    behind = '0'
+    head_branch = run_cmd('git symbolic-ref HEAD').strip()
+    tracking_branch = run_cmd('git for-each-ref --format="%(upstream:short)" '
+                              + head_branch, ignore_error=True).strip()
+    if tracking_branch:
+        behind_ahead = run_cmd('git rev-list --left-right --count %s...HEAD'
+                               % tracking_branch).split()
+        behind = behind_ahead[0]
+        ahead = behind_ahead[1]
 
     # Result
     out = '\n'.join([
         branch,
-        remote_ahead,
-        remote_behind,
+        ahead,
+        behind,
         str(staged),
         str(conflicts),
         str(unstaged),
