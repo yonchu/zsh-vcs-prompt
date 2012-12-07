@@ -223,7 +223,7 @@ function vcs_super_info_raw_data() {
     if [ "$ZSH_VCS_PROMPT_USING_PYTHON" = 'true' ] \
         && type python > /dev/null 2>&1 \
         && type git > /dev/null 2>&1 \
-        && [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
+        && [ "$(command git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
 
         # Check python command.
         local cmd_gitstatus="${ZSH_VCS_PROMPT_DIR}/gitstatus-fast.py"
@@ -280,12 +280,12 @@ function _zsh_vcs_prompt_git_status() {
     local untracked_files
     local stash_list
     local is_inside_work_tree
-    if [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
+    if [ "$(command git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
         is_inside_work_tree='true'
-        staged_files="$(git diff --staged --name-status)"
-        unstaged_files="$(git diff --name-status)"
-        untracked_files="$(git ls-files --others --exclude-standard)"
-        stash_list="$(git stash list)"
+        staged_files="$(command git diff --staged --name-status)"
+        unstaged_files="$(command git diff --name-status)"
+        untracked_files="$(command git ls-files --others --exclude-standard)"
+        stash_list="$(command git stash list)"
     fi
 
     # Count staged and conflicts files.
@@ -307,10 +307,11 @@ function _zsh_vcs_prompt_git_status() {
     fi
 
     # Count commits not pushed.
-    local tracking_branch=$(git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref -q HEAD)" 2> /dev/null)
+    local tracking_branch=$(command git for-each-ref --format='%(upstream:short)' \
+        "$(command git symbolic-ref -q HEAD)" 2> /dev/null)
     if [ -n "$tracking_branch" ]; then
         local -a behind_ahead
-        behind_ahead=($(git rev-list --left-right --count $tracking_branch...HEAD))
+        behind_ahead=($(command git rev-list --left-right --count $tracking_branch...HEAD))
         behind=${behind_ahead[1]}
         ahead=${behind_ahead[2]}
     fi
