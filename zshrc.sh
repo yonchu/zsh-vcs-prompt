@@ -83,6 +83,9 @@ ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
 autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git svn hg bzr
 
+# Specify the command path to git used by VCS_INFO.
+zstyle ':vcs_info:git:*:-all-' command =git
+
 # The maximum number of vcs_info_msg_*_ variables.
 zstyle ':vcs_info:*' max-exports 5
 
