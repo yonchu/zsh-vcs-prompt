@@ -59,28 +59,6 @@ The variables is defined as follows by default.
 If you chage it, configures the variables in your ``~/.zshrc``.
 
 ```bash
-## Prompt formats.
-#   %s : The VCS name (e.g. git svn hg).
-#   %a : The action name.
-#   %b : The current branch name.
-#
-#   %c : The ahead status.
-#   %d : The behind status.
-#
-#   %e : The staged status.
-#   %f : The conflicted status.
-#   %g : The unstaged status.
-#   %h : The untracked status.
-#   %i : The stashed status.
-#   %j : The clean status.
-#
-# Git.
-ZSH_VCS_PROMPT_GIT_FORMATS='(%s)-[%b%c%d|%e%f%g%h%i%j]'
-ZSH_VCS_PROMPT_GIT_ACTION_FORMATS='(%s)-[%b:%a%c%d|%e%f%g%h%i%j]'
-# Other vcs.
-ZSH_VCS_PROMPT_VCS_FORMATS='(%s)-[%b]'
-ZSH_VCS_PROMPT_VCS_ACTION_FORMATS='(%s)-[%b:%a]'
-
 ## The symbols.
 ZSH_VCS_PROMPT_AHEAD_SIGIL='↑ '
 ZSH_VCS_PROMPT_BEHIND_SIGIL='↓ '
@@ -90,20 +68,104 @@ ZSH_VCS_PROMPT_UNSTAGED_SIGIL='✚ '
 ZSH_VCS_PROMPT_UNTRACKED_SIGIL='… '
 ZSH_VCS_PROMPT_STASHED_SIGIL='⚑'
 ZSH_VCS_PROMPT_CLEAN_SIGIL='✔ '
+```
 
-## Color settings.
-ZSH_VCS_PROMPT_VCS_NAME_COLOR='%{%B%F{green}%}'
-ZSH_VCS_PROMPT_VCS_NAME_COLOR_USING_PYTHON='%{%F{yellow}%}'
-ZSH_VCS_PROMPT_BRANCH_COLOR='%{%B%F{red}%}'
-ZSH_VCS_PROMPT_ACTION_COLOR='%{%B%F{red}%}'
-ZSH_VCS_PROMPT_AHEAD_COLOR=''
-ZSH_VCS_PROMPT_BEHIND_COLOR=''
-ZSH_VCS_PROMPT_STAGED_COLOR='%{%F{blue}%}'
-ZSH_VCS_PROMPT_CONFLICTS_COLOR='%{%F{red}%}'
-ZSH_VCS_PROMPT_UNSTAGED_COLOR='%{%F{yellow}%}'
-ZSH_VCS_PROMPT_UNTRACKED_COLOR=''
-ZSH_VCS_PROMPT_STASHED_COLOR='%{%F{cyan}%}'
-ZSH_VCS_PROMPT_CLEAN_COLOR='%{%F{green}%}'
+```bash
+## Prompt formats.
+#   #s : The VCS name (e.g. git svn hg).
+#   #a : The action name.
+#   #b : The current branch name.
+#
+#   #c : The ahead status.
+#   #d : The behind status.
+#
+#   #e : The staged status.
+#   #f : The conflicted status.
+#   #g : The unstaged status.
+#   #h : The untracked status.
+#   #i : The stashed status.
+#   #j : The clean status.
+
+### Git.
+## No action.
+# VCS name
+ZSH_VCS_PROMPT_GIT_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+# Branch name
+ZSH_VCS_PROMPT_GIT_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
+# Ahead and Behind
+ZSH_VCS_PROMPT_GIT_FORMATS+='#c#d|'
+# Staged
+ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{blue}%}#e%{%f%b%}'
+# Conflicts
+ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{red}%}#f%{%f%b%}'
+# Unstaged
+ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{yellow}%}#g%{%f%b%}'
+# Untracked
+ZSH_VCS_PROMPT_GIT_FORMATS+='#h'
+# Stashed
+ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{cyan}%}#i%{%f%b%}'
+# Clean
+ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{green}%}#j%{%f%b%}]'
+
+
+## No action using python.
+# VCS name
+ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON='(%{%B%F{yellow}%}#s%{%f%b%})'
+# Branch name
+ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='[%{%B%F{red}%}#b%{%f%b%}'
+# Ahead and Behind
+ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='#c#d|'
+# Staged
+ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{blue}%}#e%{%f%b%}'
+# Conflicts
+ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{red}%}#f%{%f%b%}'
+# Unstaged
+ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{yellow}%}#g%{%f%b%}'
+# Untracked
+ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='#h'
+# Stashed
+ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{cyan}%}#i%{%f%b%}'
+# Clean
+ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{green}%}#j%{%f%b%}]'
+
+
+## Action.
+# VCS name
+ZSH_VCS_PROMPT_GIT_ACTION_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+# Branch name
+ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
+# Action
+ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+=':%{%B%F{red}%}#a%{%f%b%}'
+# Ahead and Behind
+ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='#c#d|'
+# Staged
+ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{blue}%}#e%{%f%}'
+# Conflicts
+ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{red}%}#f%{%f%}'
+# Unstaged
+ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{yellow}%}#g%{%f%}'
+# Untracked
+ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='#h'
+# Stashed
+ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{cyan}%}#i%{%f%}'
+# Clean
+ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{green}%}#j%{%f%}]'
+
+
+### Other vcs.
+## No action.
+# VCS name
+ZSH_VCS_PROMPT_VCS_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+# Branch name
+ZSH_VCS_PROMPT_VCS_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}]'
+
+## Action.
+# VCS name
+ZSH_VCS_PROMPT_VCS_ACTION_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+# Branch name
+ZSH_VCS_PROMPT_VCS_ACTION_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
+# Action
+ZSH_VCS_PROMPT_VCS_ACTION_FORMATS+=':%{%B%F{red}%}#a%{%f%b%}]'
 ```
 
 See also
