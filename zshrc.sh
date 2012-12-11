@@ -251,7 +251,7 @@ function vcs_super_info_raw_data() {
         # Check python command.
         local cmd_gitstatus="${ZSH_VCS_PROMPT_DIR}/gitstatus-fast.py"
         if [ ! -f "$cmd_gitstatus" ]; then
-            echo '[ zsh-vcs-prompt error: gitstatus-fast.py is not found ]'
+            echo '[ zsh-vcs-prompt error: gitstatus-fast.py is not found ]' 1>&2
             return 1
         fi
 
@@ -268,12 +268,29 @@ function vcs_super_info_raw_data() {
     fi
 
     # Don't use python.
-    local cmd_vcsstatus="${ZSH_VCS_PROMPT_DIR}/vcsstatus.sh"
-    if [ ! -f "$cmd_vcsstatus" ]; then
-        echo '[ zsh-vcs-prompt error: vcsstatus.sh is not found ]'
+    local vcs_status
+
+    # Use hooks.
+    local cmd_vcsstatus_hooks="${ZSH_VCS_PROMPT_DIR}/vcsstatus-hooks.sh"
+    if [ ! -f "$cmd_vcsstatus_hooks" ]; then
+        echo '[ zsh-vcs-prompt error: vcsstatus-hooks.sh is not found ]' 1>&2
         return 1
     fi
-    local vcs_status="$("$cmd_vcsstatus" 2>/dev/null)"
+    vcs_status="$("$cmd_vcsstatus_hooks" 2>/dev/null)"
+
+    # Not use hooks.
+    if [ $? -ne 0 ]; then
+        local cmd_vcsstatus="${ZSH_VCS_PROMPT_DIR}/vcsstatus.sh"
+        if [ ! -f "$cmd_vcsstatus" ]; then
+            echo '[ zsh-vcs-prompt error: vcsstatus.sh is not found ]' 1>&2
+            return 1
+        fi
+        vcs_status="$("$cmd_vcsstatus" 2>/dev/null)"
+    fi
+
+    if [ -z "$vcs_status" ]; then
+        return 0
+    fi
 
     # Output result.
     echo "$using_python\n$vcs_status"
