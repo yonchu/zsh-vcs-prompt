@@ -193,9 +193,9 @@ function vcs_super_info() {
     unstaged=$(_zsh_vcs_prompt_set_sigil "$unstaged" "$ZSH_VCS_PROMPT_UNSTAGED_SIGIL")
     untracked=$(_zsh_vcs_prompt_set_sigil "$untracked" "$ZSH_VCS_PROMPT_UNTRACKED_SIGIL")
     stashed=$(_zsh_vcs_prompt_set_sigil "$stashed" "$ZSH_VCS_PROMPT_STASHED_SIGIL")
-    if [ "$clean" -eq 1 ]; then
+    if [ "$clean" = '1' ]; then
         clean="$ZSH_VCS_PROMPT_CLEAN_SIGIL"
-    else
+    elif [ "$clean" = '0' ]; then
         clean=''
     fi
 
@@ -237,7 +237,7 @@ function _zsh_vcs_prompt_set_sigil() {
 #   unstaged  : Unstaged count. (No unstaged : 0)
 #   untracked : Untracked count.(No untracked : 0)
 #   stashed   : Stashed count.(No stashed : 0)
-#   clean     : Clean flag. (Clean is 1, Not clean is 0)
+#   clean     : Clean flag. (Clean is 1, Not clean is 0, Unknown is ?)
 #
 function vcs_super_info_raw_data() {
     local using_python=0

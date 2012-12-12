@@ -13,7 +13,7 @@
 #      unstaged  : Unstaged count. (No unstaged : 0)
 #      untracked : Untracked count.(No untracked : 0)
 #      stashed   : Stashed count.(No stashed : 0)
-#      clean     : Clean flag. (Clean is 1, Not clean is 0)
+#      clean     : Clean flag. (Clean is 1, Not clean is 0, Unknown is ?)
 #
 
 # Check zsh version.
@@ -117,10 +117,15 @@ function get_git_status() {
     local stash_list
     local is_inside_work_tree
 
-    staged_files="$(command git diff --staged --name-status)"
-    unstaged_files="$(command git diff --name-status)"
-    untracked_files="$(command git ls-files --others --exclude-standard)"
-    stash_list="$(command git stash list)"
+    if [ "$(command git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ]; then
+        is_inside_work_tree='true'
+        staged_files="$(command git diff --staged --name-status)"
+        unstaged_files="$(command git diff --name-status)"
+        untracked_files="$(command git ls-files --others --exclude-standard)"
+        stash_list="$(command git stash list)"
+    else
+        clean='?'
+    fi
 
     # Count staged and conflicts files.
     if [ -n "$staged_files" ];then
@@ -156,8 +161,10 @@ function get_git_status() {
     fi
 
     # Check clean.
-    if (($staged + $unstaged + $untracked + $conflicts == 0)); then
-        clean=1
+    if [ "$is_inside_work_tree" = 'true' ]; then
+        if (($staged + $unstaged + $untracked + $conflicts == 0)); then
+            clean=1
+        fi
     fi
 
     # Output result.

@@ -13,7 +13,7 @@
 #      unstaged  : Unstaged count. (No unstaged : 0)
 #      untracked : Untracked count.(No untracked : 0)
 #      stashed   : Stashed count.(No stashed : 0)
-#      clean     : Clean flag. (Clean is 1, Not clean is 0)
+#      clean     : Clean flag. (Clean is 1, Not clean is 0, Unknown is ?)
 #
 
 ## VCS_INFO configurations.
@@ -100,12 +100,14 @@ function get_git_status() {
     local untracked_files
     local stash_list
     local is_inside_work_tree
-    if [ "$(command git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
+    if [ "$(command git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ]; then
         is_inside_work_tree='true'
         staged_files="$(command git diff --staged --name-status)"
         unstaged_files="$(command git diff --name-status)"
         untracked_files="$(command git ls-files --others --exclude-standard)"
         stash_list="$(command git stash list)"
+    else
+        clean='?'
     fi
 
     # Count staged and conflicts files.
