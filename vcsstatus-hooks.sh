@@ -58,7 +58,7 @@ zstyle ':vcs_info:(hg|bzr):*' use-simple true
 zstyle ':vcs_info:*' formats '%s' '%b' '%m'
 zstyle ':vcs_info:*' actionformats '%s' '%b' '%m' '%a'
 
-zstyle ':vcs_info:(git|hg):*' check-for-changes true
+zstyle ':vcs_info:(git|hg):*' check-for-changes false
 
 # Register the hook function.
 zstyle ':vcs_info:git+set-message:*' hooks \
