@@ -61,20 +61,11 @@ zstyle ':vcs_info:*' actionformats '%s' '%b' '%m' '%a'
 zstyle ':vcs_info:(git|hg):*' check-for-changes false
 
 # Register the hook function.
-zstyle ':vcs_info:git+set-message:*' hooks \
-    git-hook-begin \
-    git-hook-detail-info
+zstyle ':vcs_info:git+set-message:*' hooks git-hook-detail-info
 
 
-# The first hook function.
-#   If return the value except 0, subsequent hook functions is not called.
-function +vi-git-hook-begin() {
-    if [ "$(command git rev-parse --is-inside-work-tree 2> /dev/null)" != 'true' ]; then
-        return 1
-    fi
-    return 0
-}
-
+# The hook function.
+# If return the value except 0, subsequent hook functions is not called.
 function +vi-git-hook-detail-info() {
     # Execute only when vcs_info_msg_2_.
     if [ "$1" != '2' ]; then
