@@ -137,6 +137,13 @@ fi
 ## The exe directory.
 ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
 
+## Source "vcsstatus*.sh".
+if [ -n "$ZSH_VERSION" ]; then
+    source $ZSH_VCS_PROMPT_DIR/vcsstatus-hooks.sh
+    if [ $? -ne 0 ]; then
+        source $ZSH_VCS_PROMPT_DIR/vcsstatus.sh
+    fi
+fi
 
 ## The function called in PROMPT or RPROMPT.
 function vcs_super_info() {
@@ -269,24 +276,7 @@ function vcs_super_info_raw_data() {
 
     # Don't use python.
     local vcs_status
-
-    # Use hooks.
-    local cmd_vcsstatus_hooks="${ZSH_VCS_PROMPT_DIR}/vcsstatus-hooks.sh"
-    if [ ! -f "$cmd_vcsstatus_hooks" ]; then
-        echo '[ zsh-vcs-prompt error: vcsstatus-hooks.sh is not found ]' 1>&2
-        return 1
-    fi
-    vcs_status="$("$cmd_vcsstatus_hooks" 2>/dev/null)"
-
-    # Not use hooks.
-    if [ $? -ne 0 ]; then
-        local cmd_vcsstatus="${ZSH_VCS_PROMPT_DIR}/vcsstatus.sh"
-        if [ ! -f "$cmd_vcsstatus" ]; then
-            echo '[ zsh-vcs-prompt error: vcsstatus.sh is not found ]' 1>&2
-            return 1
-        fi
-        vcs_status="$("$cmd_vcsstatus" 2>/dev/null)"
-    fi
+    vcs_status="$(_zsh_vcs_prompt_vcs_detail_info)"
 
     if [ -z "$vcs_status" ]; then
         return 0

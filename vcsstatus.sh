@@ -1,4 +1,3 @@
-#!/usr/bin/env zsh
 #
 #  vcsstatus.sh
 #
@@ -23,7 +22,7 @@
 #  http://d.hatena.ne.jp/yuroyoro/20110219/1298089409
 #  http://d.hatena.ne.jp/pasela/20110216/git_not_pushed
 #  http://liosk.blog103.fc2.com/blog-entry-209.html
-autoload -Uz vcs_info || exit 1
+autoload -Uz vcs_info || return 1
 zstyle ':vcs_info:*' enable git svn hg bzr
 
 # Specify the command path to git used by VCS_INFO.
@@ -58,7 +57,7 @@ if is-at-least 4.3.10; then
 fi
 
 
-function vcs_detail_info() {
+function _zsh_vcs_prompt_vcs_detail_info() {
     local vcs_name
     local vcs_branch_name
     local vcs_action=0
@@ -74,7 +73,7 @@ function vcs_detail_info() {
     vcs_branch_name=$vcs_info_msg_1_
     vcs_action=${vcs_info_msg_2_:-$vcs_action}
     if [ "$vcs_name" = 'git' ]; then
-        git_status="$(get_git_status)"
+        git_status="$(_zsh_vcs_prompt_get_git_status)"
     fi
 
     # Output result.
@@ -83,7 +82,7 @@ function vcs_detail_info() {
     return 0
 }
 
-function get_git_status() {
+function _zsh_vcs_prompt_get_git_status() {
     # Define variables for git status.
     local ahead=0
     local behind=0
@@ -153,9 +152,6 @@ function get_git_status() {
     # Output result.
     echo "$ahead\n$behind\n$staged\n$conflicts\n$unstaged\n$untracked\n$stashed\n$clean"
 }
-
-## Main
-vcs_detail_info
 
 # vim: ft=zsh
 
