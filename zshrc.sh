@@ -258,7 +258,7 @@ function vcs_super_info_raw_data() {
         # Check python command.
         local cmd_gitstatus="${ZSH_VCS_PROMPT_DIR}/gitstatus-fast.py"
         if [ ! -f "$cmd_gitstatus" ]; then
-            echo '[ zsh-vcs-prompt error: gitstatus-fast.py is not found ]' 1>&2
+            echo "[ zsh-vcs-prompt error: ${ZSH_VCS_PROMPT_DIR}/gitstatus-fast.py is not found ]" 1>&2
             return 1
         fi
 
