@@ -204,7 +204,8 @@ function vcs_super_info() {
     fi
 
     # Compose prompt status.
-    echo "$used_formats" | sed \
+    local prompt_info
+    prompt_info=$(echo "$used_formats" | sed \
         -e "s/#s/$vcs_name/" \
         -e "s/#a/$action/" \
         -e "s/#b/$branch/" \
@@ -215,7 +216,9 @@ function vcs_super_info() {
         -e "s/#g/$unstaged/" \
         -e "s/#h/$untracked/" \
         -e "s/#i/$stashed/" \
-        -e "s/#j/$clean/"
+        -e "s/#j/$clean/")
+
+    echo "$prompt_info"
 }
 
 # Helper function.
@@ -266,7 +269,10 @@ function vcs_super_info_raw_data() {
             local vcs_name='git'
             local vcs_action=0
             # Output result.
-            echo "$using_python\n$vcs_name\n$vcs_action\n$git_status"
+            echo "$using_python"
+            echo "$vcs_name"
+            echo "$vcs_action"
+            echo "$git_status"
             return 0
         fi
     fi
@@ -280,7 +286,8 @@ function vcs_super_info_raw_data() {
     fi
 
     # Output result.
-    echo "$using_python\n$vcs_status"
+    echo "$using_python"
+    echo "$vcs_status"
 
     return 0
 }
