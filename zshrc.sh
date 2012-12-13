@@ -139,10 +139,7 @@ ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
 
 ## Source "vcsstatus*.sh".
 if [ -n "$ZSH_VERSION" ]; then
-    source $ZSH_VCS_PROMPT_DIR/vcsstatus-hooks.sh
-    if [ $? -ne 0 ]; then
-        source $ZSH_VCS_PROMPT_DIR/vcsstatus.sh
-    fi
+    source $ZSH_VCS_PROMPT_DIR/vcsstatus.sh
 fi
 
 ## The function called in PROMPT or RPROMPT.

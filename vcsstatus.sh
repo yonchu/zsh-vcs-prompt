@@ -47,15 +47,18 @@ zstyle ':vcs_info:(hg|bzr):*' use-simple true
 #   %u : The string from the unstagedstr style if there are unstaged changes in the repository.
 #
 # Put the data into vcs_info_msg_*_ variables.
-zstyle ':vcs_info:*' formats '%s' '%b'
-zstyle ':vcs_info:*' actionformats '%s' '%b' '%a'
+zstyle ':vcs_info:*' formats '%s' '%b' '%m'
+zstyle ':vcs_info:*' actionformats '%s' '%b' '%m' '%a'
 
+zstyle ':vcs_info:(git|hg):*' check-for-changes false
+
+
+# Check zsh version.
 autoload -Uz is-at-least
-if is-at-least 4.3.10; then
-    # In the case of zsh version >= 4.3.10.
-    zstyle ':vcs_info:(git|hg):*' check-for-changes true
+if is-at-least 4.3.11; then
+    # Register the hook function.
+    zstyle ':vcs_info:git+set-message:*' hooks git-hook-detail-info
 fi
-
 
 function _zsh_vcs_prompt_vcs_detail_info() {
     local vcs_name
@@ -71,14 +74,32 @@ function _zsh_vcs_prompt_vcs_detail_info() {
 
     vcs_name=$vcs_info_msg_0_
     vcs_branch_name=$vcs_info_msg_1_
-    vcs_action=${vcs_info_msg_2_:-$vcs_action}
-    if [ "$vcs_name" = 'git' ]; then
-        git_status="$(_zsh_vcs_prompt_get_git_status)"
+    vcs_action=${vcs_info_msg_3_:-$vcs_action}
+
+    # Get git status.
+    if is-at-least 4.3.11; then
+        git_status="$vcs_info_msg_2_"
+    else
+        if [ "$vcs_name" = 'git' ]; then
+            git_status="$(_zsh_vcs_prompt_get_git_status)"
+        fi
     fi
 
     # Output result.
     echo "$vcs_name\n$vcs_action\n$vcs_branch_name\n$git_status"
 
+    return 0
+}
+
+# The hook function.
+# If return the value except 0, subsequent hook functions is not called.
+function +vi-git-hook-detail-info() {
+    # Execute only when vcs_info_msg_2_.
+    if [ "$1" != '2' ]; then
+        return 0
+    fi
+    local git_status="$(_zsh_vcs_prompt_get_git_status)"
+    hook_com[misc]+="$git_status"
     return 0
 }
 
@@ -99,6 +120,7 @@ function _zsh_vcs_prompt_get_git_status() {
     local untracked_files
     local stash_list
     local is_inside_work_tree
+
     if [ "$(command git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ]; then
         is_inside_work_tree='true'
         staged_files="$(command git diff --staged --name-status)"
