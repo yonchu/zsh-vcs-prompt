@@ -20,6 +20,9 @@
 #  try to change the values in the following variables in your zshrc file.
 #
 
+## Enable caching, if set 'true'.
+ZSH_VCS_PROMPT_ENABLE_CACHING=${ZSH_VCS_PROMPT_ENABLE_CACHING:-'false'}
+
 ## Use the python script (gitstatus-fast.py) by default.
 ZSH_VCS_PROMPT_USING_PYTHON=${ZSH_VCS_PROMPT_USING_PYTHON:-'true'}
 
@@ -137,16 +140,40 @@ fi
 ## The exe directory.
 ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
 
+## vcs info status (cache data)
+ZSH_VCS_PROMPT_VCS_STATUS=''
+
 ## Source "vcsstatus*.sh".
+# Enable to use the function _zsh_vcs_prompt_vcs_detail_info
 if [ -n "$ZSH_VERSION" ]; then
     source $ZSH_VCS_PROMPT_DIR/vcsstatus.sh
 fi
 
-## The function called in PROMPT or RPROMPT.
+
+## This function is called in PROMPT or RPROMPT.
 function vcs_super_info() {
+    if [ "$ZSH_VCS_PROMPT_ENABLE_CACHING" != 'true' ]; then
+        _zsh_vcs_prompt_update_vcs_status
+    fi
+    echo "$ZSH_VCS_PROMPT_VCS_STATUS"
+}
+
+
+function _zsh_vcs_prompt_precmd_hook_func() {
+    if [ "$ZSH_VCS_PROMPT_ENABLE_CACHING" = 'true' ]; then
+        _zsh_vcs_prompt_update_vcs_status
+    fi
+}
+# Register precmd hook function
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _zsh_vcs_prompt_precmd_hook_func
+
+
+function _zsh_vcs_prompt_update_vcs_status() {
     # Parse raw data.
     local raw_data="$(vcs_super_info_raw_data)"
     if [ -z "$raw_data" ]; then
+        ZSH_VCS_PROMPT_VCS_STATUS=''
         return 0
     fi
     local -a vcs_status
@@ -218,7 +245,7 @@ function vcs_super_info() {
         -e "s/#i/$stashed/" \
         -e "s/#j/$clean/")
 
-    echo "$prompt_info"
+    ZSH_VCS_PROMPT_VCS_STATUS=$prompt_info
 }
 
 # Helper function.
