@@ -55,7 +55,7 @@ ZSH_VCS_PROMPT_CLEAN_SIGIL=${ZSH_VCS_PROMPT_CLEAN_SIGIL:-'✔ '}
 # No action.
 if [ -z "$ZSH_VCS_PROMPT_GIT_FORMATS" ]; then
     # VCS name
-    ZSH_VCS_PROMPT_GIT_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+    ZSH_VCS_PROMPT_GIT_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
     # Branch name
     ZSH_VCS_PROMPT_GIT_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
     # Ahead and Behind
@@ -75,29 +75,13 @@ if [ -z "$ZSH_VCS_PROMPT_GIT_FORMATS" ]; then
 fi
 # No action using python.
 if [ -z "$ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON" ]; then
-    # VCS name
-    ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON='(%{%B%F{yellow}%}#s%{%f%b%})'
-    # Branch name
-    ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='[%{%B%F{red}%}#b%{%f%b%}'
-    # Ahead and Behind
-    ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='#c#d|'
-    # Staged
-    ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{blue}%}#e%{%f%b%}'
-    # Conflicts
-    ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{red}%}#f%{%f%b%}'
-    # Unstaged
-    ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{yellow}%}#g%{%f%b%}'
-    # Untracked
-    ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='#h'
-    # Stashed
-    ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{cyan}%}#i%{%f%b%}'
-    # Clean
-    ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{green}%}#j%{%f%b%}]'
+    # Default is empty.
+    ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON=''
 fi
 # Action.
 if [ -z "$ZSH_VCS_PROMPT_GIT_ACTION_FORMATS" ]; then
     # VCS name
-    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
     # Branch name
     ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
     # Action
@@ -122,14 +106,14 @@ fi
 # No action.
 if [ -z "$ZSH_VCS_PROMPT_VCS_FORMATS" ]; then
     # VCS name
-    ZSH_VCS_PROMPT_VCS_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+    ZSH_VCS_PROMPT_VCS_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
     # Branch name
     ZSH_VCS_PROMPT_VCS_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}]'
 fi
 # Action.
 if [ -z "$ZSH_VCS_PROMPT_VCS_ACTION_FORMATS" ]; then
     # VCS name
-    ZSH_VCS_PROMPT_VCS_ACTION_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+    ZSH_VCS_PROMPT_VCS_ACTION_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
     # Branch name
     ZSH_VCS_PROMPT_VCS_ACTION_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
     # Action
@@ -197,7 +181,7 @@ function _zsh_vcs_prompt_update_vcs_status() {
     if [ "$vcs_name" = 'git' ]; then
         used_formats="$ZSH_VCS_PROMPT_GIT_ACTION_FORMATS"
         if [ -z "$action" -o "$action" = '0' ]; then
-            if [ "$using_python" = '1' ]; then
+            if [ "$using_python" = '1' -a -n "$ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON" ]; then
                 used_formats="$ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON"
             else
                 used_formats="$ZSH_VCS_PROMPT_GIT_FORMATS"

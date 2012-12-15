@@ -89,7 +89,7 @@ ZSH_VCS_PROMPT_CLEAN_SIGIL='✔ '
 ### Git.
 ## No action.
 # VCS name
-ZSH_VCS_PROMPT_GIT_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+ZSH_VCS_PROMPT_GIT_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
 # Branch name
 ZSH_VCS_PROMPT_GIT_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
 # Ahead and Behind
@@ -107,31 +107,13 @@ ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{cyan}%}#i%{%f%b%}'
 # Clean
 ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{green}%}#j%{%f%b%}]'
 
-
 ## No action using python.
-# VCS name
-ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON='(%{%B%F{yellow}%}#s%{%f%b%})'
-# Branch name
-ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='[%{%B%F{red}%}#b%{%f%b%}'
-# Ahead and Behind
-ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='#c#d|'
-# Staged
-ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{blue}%}#e%{%f%b%}'
-# Conflicts
-ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{red}%}#f%{%f%b%}'
-# Unstaged
-ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{yellow}%}#g%{%f%b%}'
-# Untracked
-ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='#h'
-# Stashed
-ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{cyan}%}#i%{%f%b%}'
-# Clean
-ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON+='%{%F{green}%}#j%{%f%b%}]'
-
+# If this variable is empty, ZSH_VCS_PROMPT_GIT_FORMATS is used instead of it.
+ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON=''
 
 ## Action.
 # VCS name
-ZSH_VCS_PROMPT_GIT_ACTION_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+ZSH_VCS_PROMPT_GIT_ACTION_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
 # Branch name
 ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
 # Action
@@ -155,13 +137,13 @@ ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{green}%}#j%{%f%}]'
 ### Other vcs.
 ## No action.
 # VCS name
-ZSH_VCS_PROMPT_VCS_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+ZSH_VCS_PROMPT_VCS_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
 # Branch name
 ZSH_VCS_PROMPT_VCS_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}]'
 
 ## Action.
 # VCS name
-ZSH_VCS_PROMPT_VCS_ACTION_FORMATS='(%{%B%F{green}%}#s%{%f%b%})'
+ZSH_VCS_PROMPT_VCS_ACTION_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
 # Branch name
 ZSH_VCS_PROMPT_VCS_ACTION_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
 # Action
