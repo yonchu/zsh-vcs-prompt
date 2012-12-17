@@ -77,6 +77,11 @@ if [ -n "$BASH_VERSION" ]; then
     if [ -z "$ZSH_VCS_PROMPT_VCS_ACTION_FORMATS" ]; then
         ZSH_VCS_PROMPT_VCS_ACTION_FORMATS=' (#s)[#b:#a]'
     fi
+
+    ## The exe directory.
+    if [ -z "$ZSH_VCS_PROMPT_DIR" ]; then
+        ZSH_VCS_PROMPT_DIR=~/.zsh/zsh-vcs-prompt
+    fi
 else
     ### ZSH
     ## Git.
@@ -147,23 +152,32 @@ else
         # Action
         ZSH_VCS_PROMPT_VCS_ACTION_FORMATS+=':%{%B%F{red}%}#a%{%f%b%}]'
     fi
+
+    ## The exe directory.
+    ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
+
+    ## Source "vcsstatus*.sh".
+    # Enable to use the function _zsh_vcs_prompt_vcs_detail_info
+    source $ZSH_VCS_PROMPT_DIR/vcsstatus.sh
+
+    # Register precmd hook function
+    autoload -Uz add-zsh-hook \
+        && add-zsh-hook precmd _zsh_vcs_prompt_precmd_hook_func
 fi
 
-## The exe directory.
-ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
 
 ## vcs info status (cache data)
 ZSH_VCS_PROMPT_VCS_STATUS=''
 
-## Source "vcsstatus*.sh".
-# Enable to use the function _zsh_vcs_prompt_vcs_detail_info
-if [ -n "$ZSH_VERSION" ]; then
-    source $ZSH_VCS_PROMPT_DIR/vcsstatus.sh
-fi
-
 
 ## This function is called in PROMPT or RPROMPT.
 function vcs_super_info() {
+    if [ -n "$BASH_VERSION" ]; then
+        _zsh_vcs_prompt_update_vcs_status
+        echo "$ZSH_VCS_PROMPT_VCS_STATUS"
+        return 0
+    fi
+
     if [ "$ZSH_VCS_PROMPT_ENABLE_CACHING" != 'true' ]; then
         _zsh_vcs_prompt_update_vcs_status
     fi
@@ -176,9 +190,6 @@ function _zsh_vcs_prompt_precmd_hook_func() {
         _zsh_vcs_prompt_update_vcs_status
     fi
 }
-# Register precmd hook function
-autoload -Uz add-zsh-hook
-add-zsh-hook precmd _zsh_vcs_prompt_precmd_hook_func
 
 
 function _zsh_vcs_prompt_update_vcs_status() {
@@ -188,8 +199,14 @@ function _zsh_vcs_prompt_update_vcs_status() {
         ZSH_VCS_PROMPT_VCS_STATUS=''
         return 0
     fi
+
     local -a vcs_status
-    vcs_status=("${(f)raw_data}")
+    if [ -n "$BASH_VERSION" ]; then
+        IFS=$'\n' vcs_status=($raw_data)
+        vcs_status=("" "${vcs_status[@]}")
+    else
+        vcs_status=("${(f)raw_data}")
+    fi
 
     local using_python=${vcs_status[1]}
     local vcs_name=${vcs_status[2]}
@@ -318,7 +335,19 @@ function vcs_super_info_raw_data() {
 
     # Don't use python.
     local vcs_status
-    vcs_status="$(_zsh_vcs_prompt_vcs_detail_info)"
+
+    if type _zsh_vcs_prompt_vcs_detail_info > /dev/null 2>&1; then
+        # Run the sourced function.
+        vcs_status="$(_zsh_vcs_prompt_vcs_detail_info)"
+    else
+        # Run the external script
+        local cmd_run_vcsstatus="${ZSH_VCS_PROMPT_DIR}/run-vcsstatus.sh"
+        if [ ! -f "$cmd_run_vcsstatus" ]; then
+            echo "[ zsh-vcs-prompt error: ${ZSH_VCS_PROMPT_DIR}/run-vcsstatus.sh is not found ]" 1>&2
+            return 1
+        fi
+        vcs_status="$("$cmd_run_vcsstatus")"
+    fi
 
     if [ -z "$vcs_status" ]; then
         return 0
