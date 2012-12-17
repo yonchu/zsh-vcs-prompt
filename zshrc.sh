@@ -51,91 +51,140 @@ ZSH_VCS_PROMPT_CLEAN_SIGIL=${ZSH_VCS_PROMPT_CLEAN_SIGIL:-'✔ '}
 #   #i : The stashed status.
 #   #j : The clean status.
 
-## Git.
-# No action.
-if [ -z "$ZSH_VCS_PROMPT_GIT_FORMATS" ]; then
-    # VCS name
-    ZSH_VCS_PROMPT_GIT_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
-    # Branch name
-    ZSH_VCS_PROMPT_GIT_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
-    # Ahead and Behind
-    ZSH_VCS_PROMPT_GIT_FORMATS+='#c#d|'
-    # Staged
-    ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{blue}%}#e%{%f%b%}'
-    # Conflicts
-    ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{red}%}#f%{%f%b%}'
-    # Unstaged
-    ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{yellow}%}#g%{%f%b%}'
-    # Untracked
-    ZSH_VCS_PROMPT_GIT_FORMATS+='#h'
-    # Stashed
-    ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{cyan}%}#i%{%f%b%}'
-    # Clean
-    ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{green}%}#j%{%f%b%}]'
-fi
-# No action using python.
-if [ -z "$ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON" ]; then
+if [ -n "$BASH_VERSION" ]; then
+    if ! type zsh > /dev/null 2>&1; then
+        echo 'Error: zsh is not installed' 1>&2
+        return 1
+    fi
+
+    ### Bash
+    ## Git.
+    # No action.
+    if [ -z "$ZSH_VCS_PROMPT_GIT_FORMATS" ]; then
+        ZSH_VCS_PROMPT_GIT_FORMATS=' (#s)[#b#c#d|#e#f#g#h#i#j]'
+    fi
+    # No action using python.
     # Default is empty.
-    ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON=''
+    if [ -z "$ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON" ]; then
+        ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON=''
+    fi
+    # Action.
+    if [ -z "$ZSH_VCS_PROMPT_GIT_ACTION_FORMATS" ]; then
+        ZSH_VCS_PROMPT_GIT_ACTION_FORMATS=' (#s)[#b:#a#c#d|#e#f#g#h#i#j]'
+    fi
+
+    ## Other vcs.
+    # No action.
+    if [ -z "$ZSH_VCS_PROMPT_VCS_FORMATS" ]; then
+        ZSH_VCS_PROMPT_VCS_FORMATS=' (#s)[#b]'
+    fi
+    # Action.
+    if [ -z "$ZSH_VCS_PROMPT_VCS_ACTION_FORMATS" ]; then
+        ZSH_VCS_PROMPT_VCS_ACTION_FORMATS=' (#s)[#b:#a]'
+    fi
+else
+    ### ZSH
+    ## Git.
+    # No action.
+    if [ -z "$ZSH_VCS_PROMPT_GIT_FORMATS" ]; then
+        # VCS name
+        ZSH_VCS_PROMPT_GIT_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
+        # Branch name
+        ZSH_VCS_PROMPT_GIT_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
+        # Ahead and Behind
+        ZSH_VCS_PROMPT_GIT_FORMATS+='#c#d|'
+        # Staged
+        ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{blue}%}#e%{%f%b%}'
+        # Conflicts
+        ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{red}%}#f%{%f%b%}'
+        # Unstaged
+        ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{yellow}%}#g%{%f%b%}'
+        # Untracked
+        ZSH_VCS_PROMPT_GIT_FORMATS+='#h'
+        # Stashed
+        ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{cyan}%}#i%{%f%b%}'
+        # Clean
+        ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{green}%}#j%{%f%b%}]'
+    fi
+    # No action using python.
+    if [ -z "$ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON" ]; then
+        # Default is empty.
+        ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON=''
+    fi
+    # Action.
+    if [ -z "$ZSH_VCS_PROMPT_GIT_ACTION_FORMATS" ]; then
+        # VCS name
+        ZSH_VCS_PROMPT_GIT_ACTION_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
+        # Branch name
+        ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
+        # Action
+        ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+=':%{%B%F{red}%}#a%{%f%b%}'
+        # Ahead and Behind
+        ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='#c#d|'
+        # Staged
+        ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{blue}%}#e%{%f%}'
+        # Conflicts
+        ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{red}%}#f%{%f%}'
+        # Unstaged
+        ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{yellow}%}#g%{%f%}'
+        # Untracked
+        ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='#h'
+        # Stashed
+        ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{cyan}%}#i%{%f%}'
+        # Clean
+        ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{green}%}#j%{%f%}]'
+    fi
+
+    ## Other vcs.
+    # No action.
+    if [ -z "$ZSH_VCS_PROMPT_VCS_FORMATS" ]; then
+        # VCS name
+        ZSH_VCS_PROMPT_VCS_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
+        # Branch name
+        ZSH_VCS_PROMPT_VCS_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}]'
+    fi
+    # Action.
+    if [ -z "$ZSH_VCS_PROMPT_VCS_ACTION_FORMATS" ]; then
+        # VCS name
+        ZSH_VCS_PROMPT_VCS_ACTION_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
+        # Branch name
+        ZSH_VCS_PROMPT_VCS_ACTION_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
+        # Action
+        ZSH_VCS_PROMPT_VCS_ACTION_FORMATS+=':%{%B%F{red}%}#a%{%f%b%}]'
+    fi
 fi
-# Action.
-if [ -z "$ZSH_VCS_PROMPT_GIT_ACTION_FORMATS" ]; then
-    # VCS name
-    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
-    # Branch name
-    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
-    # Action
-    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+=':%{%B%F{red}%}#a%{%f%b%}'
-    # Ahead and Behind
-    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='#c#d|'
-    # Staged
-    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{blue}%}#e%{%f%}'
-    # Conflicts
-    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{red}%}#f%{%f%}'
-    # Unstaged
-    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{yellow}%}#g%{%f%}'
-    # Untracked
-    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='#h'
-    # Stashed
-    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{cyan}%}#i%{%f%}'
-    # Clean
-    ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{green}%}#j%{%f%}]'
-fi
-
-## Other vcs.
-# No action.
-if [ -z "$ZSH_VCS_PROMPT_VCS_FORMATS" ]; then
-    # VCS name
-    ZSH_VCS_PROMPT_VCS_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
-    # Branch name
-    ZSH_VCS_PROMPT_VCS_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}]'
-fi
-# Action.
-if [ -z "$ZSH_VCS_PROMPT_VCS_ACTION_FORMATS" ]; then
-    # VCS name
-    ZSH_VCS_PROMPT_VCS_ACTION_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
-    # Branch name
-    ZSH_VCS_PROMPT_VCS_ACTION_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}'
-    # Action
-    ZSH_VCS_PROMPT_VCS_ACTION_FORMATS+=':%{%B%F{red}%}#a%{%f%b%}]'
-fi
 
 
-## The exe directory.
-ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
+## Initialize.
+if [ -n "$BASH_VERSION" ]; then
+    ## The exe directory.
+    if [ -z "$ZSH_VCS_PROMPT_DIR" ]; then
+        ZSH_VCS_PROMPT_DIR=~/.zsh/zsh-vcs-prompt
+    fi
+else
+    ## The exe directory.
+    ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
 
-## vcs info status (cache data)
-ZSH_VCS_PROMPT_VCS_STATUS=''
-
-## Source "vcsstatus*.sh".
-# Enable to use the function _zsh_vcs_prompt_vcs_detail_info
-if [ -n "$ZSH_VERSION" ]; then
+    ## Source "vcsstatus*.sh".
+    # Enable to use the function _zsh_vcs_prompt_vcs_detail_info
     source $ZSH_VCS_PROMPT_DIR/vcsstatus.sh
+
+    # Register precmd hook function
+    autoload -Uz add-zsh-hook \
+        && add-zsh-hook precmd _zsh_vcs_prompt_precmd_hook_func
 fi
+# vcs info status (cache data).
+ZSH_VCS_PROMPT_VCS_STATUS=''
 
 
 ## This function is called in PROMPT or RPROMPT.
 function vcs_super_info() {
+    if [ -n "$BASH_VERSION" ]; then
+        _zsh_vcs_prompt_update_vcs_status
+        echo "$ZSH_VCS_PROMPT_VCS_STATUS"
+        return 0
+    fi
+
     if [ "$ZSH_VCS_PROMPT_ENABLE_CACHING" != 'true' ]; then
         _zsh_vcs_prompt_update_vcs_status
     fi
@@ -148,9 +197,6 @@ function _zsh_vcs_prompt_precmd_hook_func() {
         _zsh_vcs_prompt_update_vcs_status
     fi
 }
-# Register precmd hook function
-autoload -Uz add-zsh-hook
-add-zsh-hook precmd _zsh_vcs_prompt_precmd_hook_func
 
 
 function _zsh_vcs_prompt_update_vcs_status() {
@@ -160,8 +206,14 @@ function _zsh_vcs_prompt_update_vcs_status() {
         ZSH_VCS_PROMPT_VCS_STATUS=''
         return 0
     fi
+
     local -a vcs_status
-    vcs_status=("${(f)raw_data}")
+    if [ -n "$BASH_VERSION" ]; then
+        IFS=$'\n' vcs_status=($raw_data)
+        vcs_status=("" "${vcs_status[@]}")
+    else
+        vcs_status=("${(f)raw_data}")
+    fi
 
     local using_python=${vcs_status[1]}
     local vcs_name=${vcs_status[2]}
@@ -290,7 +342,19 @@ function vcs_super_info_raw_data() {
 
     # Don't use python.
     local vcs_status
-    vcs_status="$(_zsh_vcs_prompt_vcs_detail_info)"
+
+    if type _zsh_vcs_prompt_vcs_detail_info > /dev/null 2>&1; then
+        # Run the sourced function.
+        vcs_status="$(_zsh_vcs_prompt_vcs_detail_info)"
+    else
+        # Run the external script
+        local cmd_run_vcsstatus="${ZSH_VCS_PROMPT_DIR}/run-vcsstatus.sh"
+        if [ ! -f "$cmd_run_vcsstatus" ]; then
+            echo "[ zsh-vcs-prompt error: ${ZSH_VCS_PROMPT_DIR}/run-vcsstatus.sh is not found ]" 1>&2
+            return 1
+        fi
+        vcs_status="$("$cmd_run_vcsstatus")"
+    fi
 
     if [ -z "$vcs_status" ]; then
         return 0
