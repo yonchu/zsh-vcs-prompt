@@ -52,6 +52,11 @@ ZSH_VCS_PROMPT_CLEAN_SIGIL=${ZSH_VCS_PROMPT_CLEAN_SIGIL:-'✔ '}
 #   #j : The clean status.
 
 if [ -n "$BASH_VERSION" ]; then
+    if ! type zsh > /dev/null 2>&1; then
+        echo 'Error: zsh is not installed' 1>&2
+        return 1
+    fi
+
     ### Bash
     ## Git.
     # No action.
