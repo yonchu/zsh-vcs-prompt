@@ -82,11 +82,6 @@ if [ -n "$BASH_VERSION" ]; then
     if [ -z "$ZSH_VCS_PROMPT_VCS_ACTION_FORMATS" ]; then
         ZSH_VCS_PROMPT_VCS_ACTION_FORMATS=' (#s)[#b:#a]'
     fi
-
-    ## The exe directory.
-    if [ -z "$ZSH_VCS_PROMPT_DIR" ]; then
-        ZSH_VCS_PROMPT_DIR=~/.zsh/zsh-vcs-prompt
-    fi
 else
     ### ZSH
     ## Git.
@@ -157,7 +152,16 @@ else
         # Action
         ZSH_VCS_PROMPT_VCS_ACTION_FORMATS+=':%{%B%F{red}%}#a%{%f%b%}]'
     fi
+fi
 
+
+## Initialize.
+if [ -n "$BASH_VERSION" ]; then
+    ## The exe directory.
+    if [ -z "$ZSH_VCS_PROMPT_DIR" ]; then
+        ZSH_VCS_PROMPT_DIR=~/.zsh/zsh-vcs-prompt
+    fi
+else
     ## The exe directory.
     ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
 
@@ -169,9 +173,7 @@ else
     autoload -Uz add-zsh-hook \
         && add-zsh-hook precmd _zsh_vcs_prompt_precmd_hook_func
 fi
-
-
-## vcs info status (cache data)
+# vcs info status (cache data).
 ZSH_VCS_PROMPT_VCS_STATUS=''
 
 
