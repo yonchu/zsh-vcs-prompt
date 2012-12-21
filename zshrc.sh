@@ -23,7 +23,7 @@
 ## Enable caching, if set 'true'.
 ZSH_VCS_PROMPT_ENABLE_CACHING=${ZSH_VCS_PROMPT_ENABLE_CACHING:-'false'}
 
-## Use the python script (gitstatus-fast.py) by default.
+## Use the python script (lib/gitstatus-fast.py) by default.
 ZSH_VCS_PROMPT_USING_PYTHON=${ZSH_VCS_PROMPT_USING_PYTHON:-'true'}
 
 ## Symbols.
@@ -165,9 +165,9 @@ else
     ## The exe directory.
     ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
 
-    ## Source "vcsstatus*.sh".
+    ## Source "lib/vcsstatus*.sh".
     # Enable to use the function _zsh_vcs_prompt_vcs_detail_info
-    source $ZSH_VCS_PROMPT_DIR/vcsstatus.sh
+    source $ZSH_VCS_PROMPT_DIR/lib/vcsstatus.sh
 
     # Register precmd hook function
     autoload -Uz add-zsh-hook \
@@ -319,9 +319,9 @@ function vcs_super_info_raw_data() {
         && [ "$(command git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
 
         # Check python command.
-        local cmd_gitstatus="${ZSH_VCS_PROMPT_DIR}/gitstatus-fast.py"
+        local cmd_gitstatus="${ZSH_VCS_PROMPT_DIR}/lib/gitstatus-fast.py"
         if [ ! -f "$cmd_gitstatus" ]; then
-            echo "[ zsh-vcs-prompt error: ${ZSH_VCS_PROMPT_DIR}/gitstatus-fast.py is not found ]" 1>&2
+            echo "[ zsh-vcs-prompt error: ${ZSH_VCS_PROMPT_DIR}/lib/gitstatus-fast.py is not found ]" 1>&2
             return 1
         fi
 
@@ -348,9 +348,9 @@ function vcs_super_info_raw_data() {
         vcs_status="$(_zsh_vcs_prompt_vcs_detail_info)"
     else
         # Run the external script
-        local cmd_run_vcsstatus="${ZSH_VCS_PROMPT_DIR}/run-vcsstatus.sh"
+        local cmd_run_vcsstatus="${ZSH_VCS_PROMPT_DIR}/lib/run-vcsstatus.sh"
         if [ ! -f "$cmd_run_vcsstatus" ]; then
-            echo "[ zsh-vcs-prompt error: ${ZSH_VCS_PROMPT_DIR}/run-vcsstatus.sh is not found ]" 1>&2
+            echo "[ zsh-vcs-prompt error: ${ZSH_VCS_PROMPT_DIR}/lib/run-vcsstatus.sh is not found ]" 1>&2
             return 1
         fi
         vcs_status="$("$cmd_run_vcsstatus")"

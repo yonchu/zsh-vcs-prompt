@@ -57,7 +57,7 @@ RPROMPT='$(vcs_super_info)'
 
 ### Python or Shell scripts?
 
-By default uses the python script (gitstatus-fast.py). But if don't use python script, you can use only shell script.
+By default uses the python script (lib/gitstatus-fast.py). But if don't use python script, you can use only shell script.
 In that case, you should have in ```~/.zshrc```:
 
 ```bash
