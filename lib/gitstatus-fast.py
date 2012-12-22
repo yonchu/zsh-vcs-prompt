@@ -10,8 +10,9 @@ from subprocess import Popen, PIPE, \
     check_call, CalledProcessError
 
 
-def run_cmd(cmd, ignore_error=False):
+def run_cmd(cmd, ignore_error=False, exargs=[]):
     cmd = shlex.split(cmd)
+    cmd.extend(exargs)
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     out, error = p.communicate()
     if not ignore_error:
@@ -51,6 +52,9 @@ def check_before_running():
 def main():
     #check_before_running()
 
+    # git top directory
+    top_dir = run_cmd('git rev-parse --show-toplevel').strip()
+
     # branch
     branch = run_cmd('git symbolic-ref --short HEAD').strip()
 
@@ -67,7 +71,7 @@ def main():
     staged = len(staged_files) - conflicts
 
     # untracked
-    untracked_files = run_cmd('git ls-files --others --exclude-standard')
+    untracked_files = run_cmd('git ls-files --others --exclude-standard', exargs=[top_dir])
     untracked_files = untracked_files.splitlines()
     untracked = len(untracked_files)
 

@@ -125,7 +125,8 @@ function _zsh_vcs_prompt_get_git_status() {
         is_inside_work_tree='true'
         staged_files="$(command git diff --staged --name-status)"
         unstaged_files="$(command git diff --name-status)"
-        untracked_files="$(command git ls-files --others --exclude-standard)"
+        untracked_files="$(command git ls-files --others --exclude-standard "$(command git rev-parse --show-toplevel)")"
+        #untracked_files="$(command git ls-files --others --exclude-standard)"
         stash_list="$(command git stash list)"
     else
         clean='?'
