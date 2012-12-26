@@ -158,12 +158,10 @@ fi
 ## Initialize.
 if [ -n "$BASH_VERSION" ]; then
     ## The exe directory.
-    if [ -z "$ZSH_VCS_PROMPT_DIR" ]; then
-        ZSH_VCS_PROMPT_DIR=~/.zsh/zsh-vcs-prompt
-    fi
+    ZSH_VCS_PROMPT_DIR=$(cd "$(dirname "$BASH_SOURCE")" && pwd)
 else
     ## The exe directory.
-    ZSH_VCS_PROMPT_DIR=$(cd $(dirname $0) && pwd)
+    ZSH_VCS_PROMPT_DIR=$(cd "$(dirname "$0")" && pwd)
 
     ## Source "lib/vcsstatus*.sh".
     # Enable to use the function _zsh_vcs_prompt_vcs_detail_info

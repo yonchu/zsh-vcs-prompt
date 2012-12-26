@@ -63,7 +63,7 @@ In that case, you should have in ```~/.zshrc```:
 ```bash
 ZSH_VCS_PROMPT_USING_PYTHON='false'
 ```
-### On bash
+### Use on bash
 
 The ``zsh-vcs-prompt`` can also be used on ``bash``.
 
@@ -76,13 +76,6 @@ source ~/.zsh/zsh-vcs-prompt/zshrc.sh
 PS1="$PS1"'\[\e[1;31m\]$(vcs_super_info)\[\e[0;m\]'
 ```
 However, unable to colorize the prompt like ``zsh``.
-
-If ``zsh-vcs-prompt`` directory is put except in the default location (~/.zsh),
- configures the following settings in your ``~/.bashrc``.
-
-```bash
-ZSH_VCS_PROMPT_DIR=/path/to/zsh-vcs-prompt
-```
 
 ### Customizing prompt
 
