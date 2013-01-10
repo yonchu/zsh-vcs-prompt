@@ -10,9 +10,10 @@ from subprocess import Popen, PIPE, \
     check_call, CalledProcessError
 
 
-def run_cmd(cmd, ignore_error=False, exargs=[]):
+def run_cmd(cmd, ignore_error=False, exargs=None):
     cmd = shlex.split(cmd)
-    cmd.extend(exargs)
+    if exargs:
+        cmd.extend(exargs)
     p = Popen(cmd, stdout=PIPE, stderr=PIPE)
     out, error = p.communicate()
     if not ignore_error:
