@@ -66,7 +66,7 @@ source ~/zsh/zsh-vcs-prompt/zshrc.sh
 RPROMPT='$(vcs_super_info)'
 ```
 
-### Python or Shell scripts?
+## Python or Shell scripts?
 
 By default uses the python script (lib/gitstatus-fast.py). But if you don't want to use the python script, you can use only shell scripts.
 In that case, you should have in ```~/.zshrc```:
@@ -80,7 +80,7 @@ However, the python script runs a little faster than the shell scripts.
 If the python script is not available, it works on shell scripts without the python script automatically.
 Therefore, you apply the above only when you want to use explicitly shell scripts.
 
-### Use on bash
+## Use on bash
 
 The ``zsh-vcs-prompt`` can also be used on ``bash``.
 
@@ -94,7 +94,7 @@ PS1="$PS1"'\[\e[1;31m\]$(vcs_super_info)\[\e[0;m\]'
 ```
 However, unable to colorize the prompt like ``zsh``.
 
-### Customizing prompt
+## Customizing prompt
 
 You can change the appearance of the prompt.
 
