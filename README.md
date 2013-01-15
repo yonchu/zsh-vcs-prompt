@@ -18,6 +18,17 @@ In particular the branch name, difference with remote branch, number of files st
 
 ![Screenshot5](https://raw.github.com/yonchu/zsh-vcs-prompt/master/img/sample05.png)
 
+
+## Features
+
+ - Displays the various vcs status.
+ - Displays the vcs action (merge, rebase, rebase-i, etc).
+ - Use python scripts (it is a little faster than shell scripts).
+ - Formats can be readily customized.
+ - It works on bash prompt (if zsh is installed).
+
+## About status
+
 Remote status:
 
 - ↑ n : ahead
@@ -57,12 +68,18 @@ RPROMPT='$(vcs_super_info)'
 
 ### Python or Shell scripts?
 
-By default uses the python script (lib/gitstatus-fast.py). But if don't use python script, you can use only shell script.
+By default uses the python script (lib/gitstatus-fast.py). But if you don't want to use the python script, you can use only shell scripts.
 In that case, you should have in ```~/.zshrc```:
 
 ```bash
 ZSH_VCS_PROMPT_USING_PYTHON='false'
 ```
+
+The shell scripts is more portable than python scripts (as it has no dependencies).
+However, the python script runs a little faster than the shell scripts.
+If the python script is not available, it works on shell scripts without the python script automatically.
+Therefore, you apply the above only when you want to use explicitly shell scripts.
+
 ### Use on bash
 
 The ``zsh-vcs-prompt`` can also be used on ``bash``.
