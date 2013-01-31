@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+import os
 import sys
 import shlex
 
@@ -55,9 +56,12 @@ def main():
 
     # git top directory
     top_dir = run_cmd('git rev-parse --show-toplevel').strip()
+    os.chdir(top_dir)
 
     # branch
-    branch = run_cmd('git symbolic-ref --short HEAD').strip()
+    # Old version git does not suppoert the option --short.
+    #branch = run_cmd('git symbolic-ref --short HEAD').strip()
+    branch = run_cmd('git symbolic-ref HEAD').strip()[11:]
 
     # unstaged
     unstaged_files = run_cmd('git diff --name-status')
@@ -72,7 +76,7 @@ def main():
     staged = len(staged_files) - conflicts
 
     # untracked
-    untracked_files = run_cmd('git ls-files --others --exclude-standard', exargs=[top_dir])
+    untracked_files = run_cmd('git ls-files --others --exclude-standard')
     untracked_files = untracked_files.splitlines()
     untracked = len(untracked_files)
 
@@ -94,15 +98,22 @@ def main():
                               + head_branch, ignore_error=True).strip()
     if tracking_branch:
         behind_ahead = run_cmd('git rev-list --left-right --count %s...HEAD'
-                               % tracking_branch).split()
-        behind = behind_ahead[0]
-        ahead = behind_ahead[1]
+                               % tracking_branch, ignore_error=True).split()
+        if behind_ahead:
+            behind = behind_ahead[0]
+            ahead = behind_ahead[1]
+        else:
+            # If the option --count is unsupported.
+            behind_ahead = run_cmd('git rev-list --left-right %s...HEAD'
+                                   % tracking_branch).splitlines()
+            ahead = len([x for x in behind_ahead if x[0] == '>'])
+            behind = len(behind_ahead) - ahead
 
     # Result
     out = '\n'.join([
         branch,
-        ahead,
-        behind,
+        str(ahead),
+        str(behind),
         str(staged),
         str(conflicts),
         str(unstaged),
