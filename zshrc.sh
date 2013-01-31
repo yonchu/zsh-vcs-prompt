@@ -14,11 +14,24 @@
 #
 ###############################################################################
 
+if [ -n "$BASH_VERSION" ]; then
+    if ! type zsh > /dev/null 2>&1; then
+        echo 'Error: zsh is not installed' 1>&2
+        return 1
+    fi
+fi
+
 ### Set default values.
 #
 #  If you want to customize the appearance of the prompt,
 #  try to change the values in the following variables in your zshrc file.
 #
+
+## Logging level.
+#   2:Output error to stderr.
+#   1:Output error to a file.
+#   O/W:Suppress error .
+ZSH_VCS_PROMPT_LOGGING_LEVEL=${ZSH_VCS_PROMPT_LOGGING_LEVEL:-''}
 
 ## Enable caching, if set 'true'.
 ZSH_VCS_PROMPT_ENABLE_CACHING=${ZSH_VCS_PROMPT_ENABLE_CACHING:-'false'}
@@ -60,11 +73,6 @@ ZSH_VCS_PROMPT_HIDE_COUNT=${ZSH_VCS_PROMPT_HIDE_COUNT:-'false'}
 #   #j : The clean status.
 
 if [ -n "$BASH_VERSION" ]; then
-    if ! type zsh > /dev/null 2>&1; then
-        echo 'Error: zsh is not installed' 1>&2
-        return 1
-    fi
-
     ### Bash
     ## Git.
     # No action.
@@ -90,6 +98,10 @@ if [ -n "$BASH_VERSION" ]; then
     if [ -z "$ZSH_VCS_PROMPT_VCS_ACTION_FORMATS" ]; then
         ZSH_VCS_PROMPT_VCS_ACTION_FORMATS=' (#s)[#b:#a]'
     fi
+
+    ## Initialize.
+    ## The exe directory.
+    ZSH_VCS_PROMPT_DIR=$(cd "$(dirname "$BASH_SOURCE")" && pwd)
 else
     ### ZSH
     ## Git.
@@ -160,14 +172,8 @@ else
         # Action
         ZSH_VCS_PROMPT_VCS_ACTION_FORMATS+=':%{%B%F{red}%}#a%{%f%b%}]'
     fi
-fi
 
-
-## Initialize.
-if [ -n "$BASH_VERSION" ]; then
-    ## The exe directory.
-    ZSH_VCS_PROMPT_DIR=$(cd "$(dirname "$BASH_SOURCE")" && pwd)
-else
+    ## Initialize.
     ## The exe directory.
     ZSH_VCS_PROMPT_DIR=$(cd "$(dirname "$0")" && pwd)
 
@@ -179,31 +185,82 @@ else
     autoload -Uz add-zsh-hook \
         && add-zsh-hook precmd _zsh_vcs_prompt_precmd_hook_func
 fi
+
+# Setup logging.
+ZSH_VCS_PROMPT_LOG_FILE="$ZSH_VCS_PROMPT_DIR/zsh-vcs-prompt.log"
+ZSH_VCS_PROMPT_ERROR_COUNT='0'
+function _zsh_vcs_prompt_check_log_file() {
+    if [ "$ZSH_VCS_PROMPT_LOGGING_LEVEL" != '1' ]; then
+        return
+    fi
+    # Create the log file.
+    if [ ! -f "$ZSH_VCS_PROMPT_LOG_FILE" ]; then
+        touch "$ZSH_VCS_PROMPT_LOG_FILE"
+        ZSH_VCS_PROMPT_LOG_UPDATED_AT=
+    fi
+    # Get updated time of the log file.
+    local dt
+    case "${OSTYPE}" in
+        freebsd*|darwin*)
+            dt=($(/bin/ls -lT "$ZSH_VCS_PROMPT_LOG_FILE" | awk '{print $9$6$7$8}' | tr -d ':'))
+            ;;
+        linux*)
+            dt=$(/bin/ls -l --time-style=long-iso "$ZSH_VCS_PROMPT_LOG_FILE" | awk '{print $6$7}' | sed 's/[:-]//g')
+            ;;
+    esac
+    if [ -z "$ZSH_VCS_PROMPT_LOG_UPDATED_AT" ]; then
+        ZSH_VCS_PROMPT_LOG_UPDATED_AT=$dt
+        return 0
+    fi
+    # Check if error occurs.
+    if [ "$ZSH_VCS_PROMPT_LOG_UPDATED_AT" != "$dt" ]; then
+        ZSH_VCS_PROMPT_ERROR_COUNT=$((${ZSH_VCS_PROMPT_ERROR_COUNT} + 1))
+        if [ "$ZSH_VCS_PROMPT_ERROR_COUNT" = '1' ]; then
+            echo "[zsh-vcs-prompt] Error: please check the log file ($ZSH_VCS_PROMPT_LOG_FILE)" 1>&2
+        fi
+        ZSH_VCS_PROMPT_VCS_STATUS="!!${ZSH_VCS_PROMPT_VCS_STATUS}"
+        ZSH_VCS_PROMPT_LOG_UPDATED_AT=$dt
+    fi
+}
+_zsh_vcs_prompt_check_log_file
+
 # vcs info status (cache data).
-ZSH_VCS_PROMPT_VCS_STATUS=''
+ZSH_VCS_PROMPT_VCS_STATUS=
 
 
 ## This function is called in PROMPT or RPROMPT.
 function vcs_super_info() {
-    if [ -n "$BASH_VERSION" ]; then
-        _zsh_vcs_prompt_update_vcs_status
-        echo "$ZSH_VCS_PROMPT_VCS_STATUS"
-        return 0
-    fi
-
-    if [ "$ZSH_VCS_PROMPT_ENABLE_CACHING" != 'true' ]; then
-        _zsh_vcs_prompt_update_vcs_status
+    # Update vcs status.
+    if [ -n "$BASH_VERSION" -o "$ZSH_VCS_PROMPT_ENABLE_CACHING" != 'true' ]; then
+        if [ "$ZSH_VCS_PROMPT_LOGGING_LEVEL" = '2' ]; then
+            _zsh_vcs_prompt_update_vcs_status
+        elif [ "$ZSH_VCS_PROMPT_LOGGING_LEVEL" = '1' ]; then
+            _zsh_vcs_prompt_check_log_file
+            _zsh_vcs_prompt_update_vcs_status 2>> "$ZSH_VCS_PROMPT_LOG_FILE"
+            _zsh_vcs_prompt_check_log_file
+        else
+            _zsh_vcs_prompt_update_vcs_status 2>/dev/null
+        fi
     fi
     echo "$ZSH_VCS_PROMPT_VCS_STATUS"
 }
 
-
+## The hook function to update vcs status.
 function _zsh_vcs_prompt_precmd_hook_func() {
+    # Update vcs status.
     if [ "$ZSH_VCS_PROMPT_ENABLE_CACHING" = 'true' ]; then
-        _zsh_vcs_prompt_update_vcs_status
+        if [ "$ZSH_VCS_PROMPT_LOGGING_LEVEL" = '2' ]; then
+            _zsh_vcs_prompt_update_vcs_status
+        elif [ "$ZSH_VCS_PROMPT_LOGGING_LEVEL" = '1' ]; then
+            _zsh_vcs_prompt_check_log_file
+            _zsh_vcs_prompt_update_vcs_status 2>> "$ZSH_VCS_PROMPT_LOG_FILE"
+            _zsh_vcs_prompt_check_log_file
+        else
+            _zsh_vcs_prompt_update_vcs_status 2>/dev/null
+        fi
     fi
+    return 0
 }
-
 
 function _zsh_vcs_prompt_update_vcs_status() {
     # Parse raw data.
@@ -345,7 +402,7 @@ function vcs_super_info_raw_data() {
         fi
 
         # Get vcs status.
-        local git_status="$(python "$cmd_gitstatus" 2>/dev/null)"
+        local git_status="$(python "$cmd_gitstatus")"
         if [ -n "$git_status" ];then
             using_python=1
             local vcs_name='git'

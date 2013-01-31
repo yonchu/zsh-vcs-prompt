@@ -127,18 +127,17 @@ function _zsh_vcs_prompt_get_git_status() {
 
     if [ "$(command git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ]; then
         is_inside_work_tree='true'
-        staged_files="$(command git diff --staged --name-status 2> /dev/null)"
+        staged_files="$(command git diff --staged --name-status)"
         if [ $? -ne 0 ]; then
             # Error occurs on old version git.
             staged_files=$(command git status --short --porcelain | command grep '^[UMADRC]')
         fi
         unstaged_files="$(command git diff --name-status)"
-        untracked_files="$(command git ls-files --others --exclude-standard "$(command git rev-parse --show-toplevel)" 2> /dev/null)"
+        untracked_files="$(command git ls-files --others --exclude-standard "$(command git rev-parse --show-toplevel)")"
         if [ $? -ne 0 ]; then
             # Error occurs on old version git.
-            untracked_files=$(cd "$1" > /dev/null 2>&1 && command git ls-files --others --exclude-standard)
+            untracked_files=$(cd "$1" > /dev/null && command git ls-files --others --exclude-standard)
         fi
-        untracked_files=$(cd "$1" > /dev/null 2>&1 && command git ls-files --others --exclude-standard)
         stash_list="$(command git stash list)"
     else
         clean='?'
@@ -167,14 +166,14 @@ function _zsh_vcs_prompt_get_git_status() {
         "$(command git symbolic-ref -q HEAD)" 2> /dev/null)
     if [ -n "$tracking_branch" ]; then
         local -a behind_ahead
-        behind_ahead=($(command git rev-list --left-right --count $tracking_branch...HEAD 2> /dev/null))
+        behind_ahead=($(command git rev-list --left-right --count "$tracking_branch"...HEAD))
         if [ -n "$behind_ahead" ]; then
             behind=${behind_ahead[1]}
             ahead=${behind_ahead[2]}
         else
             # If the option --count is unsupported.
             local behind_ahead_lines
-            behind_ahead_lines=$(command git rev-list --left-right $tracking_branch...HEAD)
+            behind_ahead_lines=$(command git rev-list --left-right "$tracking_branch"...HEAD)
             if [ -n "$behind_ahead_lines" ]; then
                 local behead
                 behead=$(echo "$behind_ahead_lines" | wc -l | tr -d ' ')
