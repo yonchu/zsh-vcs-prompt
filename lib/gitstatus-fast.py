@@ -82,11 +82,6 @@ def main():
         else:
             raise
 
-    # unstaged
-    unstaged_files = run_cmd('git diff --name-status')
-    unstaged_files = [namestat[0] for namestat in unstaged_files.splitlines()]
-    unstaged = len(unstaged_files) - unstaged_files.count('U')
-
     # staged
     try:
         staged_files = run_cmd('git diff --staged --name-status').splitlines()
@@ -100,7 +95,14 @@ def main():
 
     # conflicts
     conflicts = staged_files.count('U')
+    if conflicts > 0:
+        return 1
     staged = len(staged_files) - conflicts
+
+    # unstaged
+    unstaged_files = run_cmd('git diff --name-status')
+    unstaged_files = [namestat[0] for namestat in unstaged_files.splitlines()]
+    unstaged = len(unstaged_files) - unstaged_files.count('U')
 
     # untracked
     untracked_files = run_cmd('git ls-files --others --exclude-standard')
