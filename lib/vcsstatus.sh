@@ -142,20 +142,20 @@ function _zsh_vcs_prompt_get_git_status() {
 
     # Count staged and conflicts files.
     if [ -n "$staged_files" ];then
-        conflicts=$(echo "$staged_files" | sed '/^[^U]/d' | wc -l | sed 's/ //g')
+        conflicts=$(echo "$staged_files" | sed '/^[^U]/d' | wc -l | tr -d ' ')
 
-        staged=$(echo "$staged_files" | wc -l | sed 's/ //g')
+        staged=$(echo "$staged_files" | wc -l | tr -d ' ')
         staged=$(($staged - $conflicts))
     fi
 
     # Count unstaged files.
     if [ -n "$unstaged_files" ]; then
-        unstaged=$(echo "$unstaged_files" | sed '/^U/d' | wc -l | sed 's/ //g')
+        unstaged=$(echo "$unstaged_files" | sed '/^U/d' | wc -l | tr -d ' ')
     fi
 
     # Count untracked files.
     if [ -n "$untracked_files" ]; then
-        untracked=$(echo "$untracked_files" | wc -l | sed 's/ //g')
+        untracked=$(echo "$untracked_files" | wc -l | tr -d ' ')
     fi
 
     # Count commits not pushed.
@@ -173,8 +173,8 @@ function _zsh_vcs_prompt_get_git_status() {
             behind_ahead_lines=$(command git rev-list --left-right $tracking_branch...HEAD)
             if [ -n "$behind_ahead_lines" ]; then
                 local behead
-                behead=$(echo "$behind_ahead_lines" | wc -l | sed 's/ //g')
-                ahead=$(echo "$behind_ahead_lines" | sed  '/^[^>]/d' | wc -l | sed 's/ //g')
+                behead=$(echo "$behind_ahead_lines" | wc -l | tr -d ' ')
+                ahead=$(echo "$behind_ahead_lines" | sed  '/^[^>]/d' | wc -l | tr -d ' ')
                 behind=$((behead - ahead))
             fi
         fi
@@ -182,7 +182,7 @@ function _zsh_vcs_prompt_get_git_status() {
 
     # Count stash.
     if [ -n "$stash_list" ]; then
-        stashed=$(echo "$stash_list" | wc -l | sed 's/ //g')
+        stashed=$(echo "$stash_list" | wc -l | tr -d ' ')
     fi
 
     # Check clean.
