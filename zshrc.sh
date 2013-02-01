@@ -26,6 +26,11 @@ ZSH_VCS_PROMPT_ENABLE_CACHING=${ZSH_VCS_PROMPT_ENABLE_CACHING:-'false'}
 ## Use the python script (lib/gitstatus-fast.py) by default.
 ZSH_VCS_PROMPT_USING_PYTHON=${ZSH_VCS_PROMPT_USING_PYTHON:-'true'}
 
+## The branch name to print no merge commit count.
+#  If not set, don't print count.
+ZSH_VCS_PROMPT_MERGE_BRANCH=${ZSH_VCS_PROMPT_MERGE_BRANCH:-'master'}
+export ZSH_VCS_PROMPT_MERGE_BRANCH
+
 ## Symbols.
 ZSH_VCS_PROMPT_AHEAD_SIGIL=${ZSH_VCS_PROMPT_AHEAD_SIGIL:-'↑ '}
 ZSH_VCS_PROMPT_BEHIND_SIGIL=${ZSH_VCS_PROMPT_BEHIND_SIGIL:-'↓ '}
@@ -228,6 +233,7 @@ function _zsh_vcs_prompt_update_vcs_status() {
     local untracked=${vcs_status[10]}
     local stashed=${vcs_status[11]}
     local clean=${vcs_status[12]}
+    local unmerged=${vcs_status[13]}
 
     # Select formats.
     local used_formats
@@ -253,6 +259,10 @@ function _zsh_vcs_prompt_update_vcs_status() {
 
     # Escape slash '/'.
     branch=$(echo "$branch" | sed 's%/%\\/%')
+    # Set unmerged count.
+    if [ -n "$unmerged" -a "$unmerged" != '0' ]; then
+        branch="${branch}(${unmerged})"
+    fi
 
     # Set sigil.
     ahead=$(_zsh_vcs_prompt_set_sigil "$ahead" "$ZSH_VCS_PROMPT_AHEAD_SIGIL")
@@ -316,6 +326,7 @@ function _zsh_vcs_prompt_set_sigil() {
 #   untracked : Untracked count.(No untracked : 0)
 #   stashed   : Stashed count.(No stashed : 0)
 #   clean     : Clean flag. (Clean is 1, Not clean is 0, Unknown is ?)
+#   unmerged  : Unmerged commits count. (No unmerged commits : 0)
 #
 function vcs_super_info_raw_data() {
     local using_python=0

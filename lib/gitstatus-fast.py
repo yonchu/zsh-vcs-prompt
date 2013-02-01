@@ -10,6 +10,8 @@ import sys
 from subprocess import Popen, PIPE, \
     check_call, CalledProcessError
 
+ENV_MERGE_BRANCH = 'ZSH_VCS_PROMPT_MERGE_BRANCH'
+
 ERR_MSG_NO_BRANCH = 'fatal: ref HEAD is not a symbolic ref'
 ERR_MSG_UNKNOWN_OPTION_SHORT = "error: unknown option `short'"
 
@@ -138,6 +140,15 @@ def main():
             ahead = len([x for x in behind_ahead if x[0] == '>'])
             behind = len(behind_ahead) - ahead
 
+    # Count unmerged commits.
+    unmerged = '0'
+    merge_branch = ENV_MERGE_BRANCH in os.environ \
+        and os.environ[ENV_MERGE_BRANCH]
+    if merge_branch and not branch == merge_branch:
+        unmerged_list = run_cmd('git rev-list %s..%s'
+                                % (merge_branch, branch)).splitlines()
+        unmerged = len(unmerged_list)
+
     # Result
     out = '\n'.join([
         branch,
@@ -148,7 +159,8 @@ def main():
         str(unstaged),
         str(untracked),
         str(stashed),
-        clean])
+        clean,
+        str(unmerged)])
     print(out)
 
 

@@ -13,6 +13,7 @@
 #      untracked : Untracked count.(No untracked : 0)
 #      stashed   : Stashed count.(No stashed : 0)
 #      clean     : Clean flag. (Clean is 1, Not clean is 0, Unknown is ?)
+#      unmerged  : Unmerged commits count. (No unmerged commits : 0)
 #
 
 ## VCS_INFO configurations.
@@ -81,7 +82,7 @@ function _zsh_vcs_prompt_vcs_detail_info() {
         git_status="$vcs_info_msg_2_"
     else
         if [ "$vcs_name" = 'git' ]; then
-            git_status="$(_zsh_vcs_prompt_get_git_status)"
+            git_status="$(_zsh_vcs_prompt_get_git_status "$vcs_branch_name")"
         fi
     fi
 
@@ -98,12 +99,14 @@ function +vi-git-hook-detail-info() {
     if [ "$1" != '2' ]; then
         return 0
     fi
-    local git_status="$(_zsh_vcs_prompt_get_git_status)"
+    local git_status="$(_zsh_vcs_prompt_get_git_status "$hook_com[branch]")"
     hook_com[misc]+="$git_status"
     return 0
 }
 
+# $1 : Branch name.
 function _zsh_vcs_prompt_get_git_status() {
+    local branch_name=$1
     # Define variables for git status.
     local ahead=0
     local behind=0
@@ -113,6 +116,7 @@ function _zsh_vcs_prompt_get_git_status() {
     local untracked=0
     local stashed=0
     local clean=0
+    local unmerged=0
 
     # Get changed files and stash list.
     local staged_files
@@ -192,8 +196,13 @@ function _zsh_vcs_prompt_get_git_status() {
         fi
     fi
 
+    # Count unmerged commits.
+    if [ -n "$ZSH_VCS_PROMPT_MERGE_BRANCH" -a "$branch_name" != "$ZSH_VCS_PROMPT_MERGE_BRANCH" ]; then
+        unmerged=$(command git rev-list "$ZSH_VCS_PROMPT_MERGE_BRANCH".."$branch_name" | wc -l | tr -d ' ')
+    fi
+
     # Output result.
-    echo "$ahead\n$behind\n$staged\n$conflicts\n$unstaged\n$untracked\n$stashed\n$clean"
+    echo "$ahead\n$behind\n$staged\n$conflicts\n$unstaged\n$untracked\n$stashed\n$clean\n$unmerged"
 }
 
 # vim: ft=zsh
