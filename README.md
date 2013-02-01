@@ -18,11 +18,13 @@ In particular the branch name, difference with remote branch, number of files st
 
 ![Screenshot5](https://raw.github.com/yonchu/zsh-vcs-prompt/master/img/sample05.png)
 
+![Screenshot6](https://raw.github.com/yonchu/zsh-vcs-prompt/master/img/sample06.png)
 
 ## Features
 
  - Displays the various vcs status.
  - Displays the vcs action (merge, rebase, rebase-i, etc).
+ - Displays unmerged commits count (to master) (e.g. branch(3) is 3 unmerged commits).
  - Use python scripts (it is a little faster than shell scripts).
  - Formats can be readily customized.
  - It works on bash prompt (if zsh is installed).
@@ -42,6 +44,7 @@ Local status:
 - ✚ n : there are n changed but unstaged files
 - … n : there are n untracked files
 - ⚑n  : there are n stashed
+- branch(n) : there are n unmerged commits to master
 
 Installation
 ---------------
@@ -62,9 +65,13 @@ $ git clone git://github.com/yonchu/zsh-vcs-prompt.git
 3.Source the file ``zshrc.sh`` from your ``~/.zshrc`` config file, and, configure your prompt. So, somewhere in ``~/.zshrc``, you should have:
 
 ```bash
-source ~/zsh/zsh-vcs-prompt/zshrc.sh
+source ~/.zsh/zsh-vcs-prompt/zshrc.sh
+ZSH_VCS_PROMPT_ENABLE_CACHING='true'
 RPROMPT='$(vcs_super_info)'
 ```
+
+Note that enclosed ``$(vcs_super_info)`` in double quotation. If call ``vcs_super_info`` in other functions (like hook functions), not set ZSH_VCS_PROMPT_ENABLE_CACHING.
+
 
 ## Python or Shell scripts?
 
@@ -89,9 +96,12 @@ The ``zsh-vcs-prompt`` can also be used on ``bash``.
 Source the file ``zshrc.sh`` from your ``~/.bashrc`` config file, and, configure your prompt in same way as ``zsh``.
 
 ```bash
-source ~/.zsh/zsh-vcs-prompt/zshrc.sh
-PS1="$PS1"'\[\e[1;31m\]$(vcs_super_info)\[\e[0;m\]'
+if [ -f ~/.zsh/zsh-vcs-prompt/zshrc.sh ]; then
+    source ~/.zsh/zsh-vcs-prompt/zshrc.sh 2> /dev/null \
+        && PS1="$PS1"'\[\e[1;31m\]$(vcs_super_info)\[\e[0;m\]'
+fi
 ```
+
 However, unable to colorize the prompt like ``zsh``.
 
 ## Customizing prompt
@@ -100,6 +110,9 @@ You can change the appearance of the prompt.
 
 The variables is defined as follows by default.
 If you chage it, configures the variables in your ``~/.zshrc``.
+
+
+**Change the symbols:**
 
 ```bash
 ## The symbols.
@@ -113,24 +126,50 @@ ZSH_VCS_PROMPT_STASHED_SIGIL='⚑'
 ZSH_VCS_PROMPT_CLEAN_SIGIL='✔ '
 ```
 
-```bash
-## Prompt formats.
-#   #s : The VCS name (e.g. git svn hg).
-#   #a : The action name.
-#   #b : The current branch name.
-#
-#   #c : The ahead status.
-#   #d : The behind status.
-#
-#   #e : The staged status.
-#   #f : The conflicted status.
-#   #g : The unstaged status.
-#   #h : The untracked status.
-#   #i : The stashed status.
-#   #j : The clean status.
+**Hide count:**
 
-### Git.
-## No action.
+```bash
+ZSH_VCS_PROMPT_HIDE_COUNT='true'
+```
+
+![hide_count](https://raw.github.com/yonchu/zsh-vcs-prompt/master/img/sample_hide_count.png)
+
+**Change the branch which count unmerged commits to:**
+
+```bash
+# Default
+#ZSH_VCS_PROMPT_MERGE_BRANCH=master
+ZSH_VCS_PROMPT_MERGE_BRANCH=develop
+```
+
+If you hide it, set the following:
+
+```bash
+ZSH_VCS_PROMPT_MERGE_BRANCH=
+```
+
+**Format string:**
+
+```
+#s : The VCS name (e.g. git svn hg).
+#a : The action name (e.g. merge, rebase, rebase_i)
+#b : The current branch name.
+
+#c : The ahead status.
+#d : The behind status.
+
+#e : The staged status.
+#f : The conflicted status.
+#g : The unstaged status.
+#h : The untracked status.
+#i : The stashed status.
+#j : The clean status.
+```
+
+**Change the format for ``git`` without Action:**
+
+```bash
+## Git without Action.
 # VCS name
 ZSH_VCS_PROMPT_GIT_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
 # Branch name
@@ -149,12 +188,12 @@ ZSH_VCS_PROMPT_GIT_FORMATS+='#h'
 ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{cyan}%}#i%{%f%b%}'
 # Clean
 ZSH_VCS_PROMPT_GIT_FORMATS+='%{%F{green}%}#j%{%f%b%}]'
+```
 
-## No action using python.
-# If this variable is empty, ZSH_VCS_PROMPT_GIT_FORMATS is used instead of it.
-ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON=''
+**Change the format for ``git`` with Action:**
 
-## Action.
+```bash
+### Git with Action.
 # VCS name
 ZSH_VCS_PROMPT_GIT_ACTION_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
 # Branch name
@@ -175,16 +214,22 @@ ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='#h'
 ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{cyan}%}#i%{%f%}'
 # Clean
 ZSH_VCS_PROMPT_GIT_ACTION_FORMATS+='%{%F{green}%}#j%{%f%}]'
+```
 
+**Change the format for other VCS without Action:**
 
-### Other vcs.
-## No action.
+```bash
+## Other VCS without Action.
 # VCS name
 ZSH_VCS_PROMPT_VCS_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
 # Branch name
 ZSH_VCS_PROMPT_VCS_FORMATS+='[%{%B%F{red}%}#b%{%f%b%}]'
+```
 
-## Action.
+**Change the format for other VCS with Action:**
+
+```bash
+## Other VCS with Action.
 # VCS name
 ZSH_VCS_PROMPT_VCS_ACTION_FORMATS='(%{%B%F{yellow}%}#s%{%f%b%})'
 # Branch name
