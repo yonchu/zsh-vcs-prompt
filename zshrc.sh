@@ -36,6 +36,9 @@ ZSH_VCS_PROMPT_UNTRACKED_SIGIL=${ZSH_VCS_PROMPT_UNTRACKED_SIGIL:-'… '}
 ZSH_VCS_PROMPT_STASHED_SIGIL=${ZSH_VCS_PROMPT_STASHED_SIGIL:-'⚑'}
 ZSH_VCS_PROMPT_CLEAN_SIGIL=${ZSH_VCS_PROMPT_CLEAN_SIGIL:-'✔ '}
 
+## Hide count if set 'true'.
+ZSH_VCS_PROMPT_HIDE_COUNT=${ZSH_VCS_PROMPT_HIDE_COUNT:-'false'}
+
 ## Prompt formats.
 #   #s : The VCS name (e.g. git svn hg).
 #   #a : The action name.
@@ -230,7 +233,9 @@ function _zsh_vcs_prompt_update_vcs_status() {
     local used_formats
     if [ "$vcs_name" = 'git' ]; then
         used_formats="$ZSH_VCS_PROMPT_GIT_ACTION_FORMATS"
+        # Check action.
         if [ -z "$action" -o "$action" = '0' ]; then
+            action=''
             if [ "$using_python" = '1' -a -n "$ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON" ]; then
                 used_formats="$ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON"
             else
@@ -239,7 +244,9 @@ function _zsh_vcs_prompt_update_vcs_status() {
         fi
     else
         used_formats="$ZSH_VCS_PROMPT_VCS_ACTION_FORMATS"
+        # Check action.
         if [ -z "$action" -o "$action" = '0' ]; then
+            action=''
             used_formats="$ZSH_VCS_PROMPT_VCS_FORMATS"
         fi
     fi
@@ -248,9 +255,6 @@ function _zsh_vcs_prompt_update_vcs_status() {
     branch=$(echo "$branch" | sed 's%/%\\/%')
 
     # Set sigil.
-    vcs_name=$(_zsh_vcs_prompt_set_sigil "$vcs_name")
-    action=$(_zsh_vcs_prompt_set_sigil "$action")
-    branch=$(_zsh_vcs_prompt_set_sigil "$branch")
     ahead=$(_zsh_vcs_prompt_set_sigil "$ahead" "$ZSH_VCS_PROMPT_AHEAD_SIGIL")
     behind=$(_zsh_vcs_prompt_set_sigil "$behind" "$ZSH_VCS_PROMPT_BEHIND_SIGIL")
     staged=$(_zsh_vcs_prompt_set_sigil "$staged" "$ZSH_VCS_PROMPT_STAGED_SIGIL")
@@ -282,9 +286,15 @@ function _zsh_vcs_prompt_update_vcs_status() {
     ZSH_VCS_PROMPT_VCS_STATUS=$prompt_info
 }
 
-# Helper function.
+# Helper function to set sigil.
+#  $1: Count or flag.
+#  $2: Sigil.
 function _zsh_vcs_prompt_set_sigil() {
     if [ -z "$1" -o "$1" = '0' ]; then
+        return
+    fi
+    if [ "$ZSH_VCS_PROMPT_HIDE_COUNT" = 'true' ]; then
+        echo "$2"
         return
     fi
     echo "$2$1"
