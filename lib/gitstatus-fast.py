@@ -10,8 +10,11 @@ import sys
 from subprocess import Popen, PIPE, \
     check_call, CalledProcessError
 
+# The name of environmental variable
+# for branch name on which count unmerged commits count.
 ENV_MERGE_BRANCH = 'ZSH_VCS_PROMPT_MERGE_BRANCH'
 
+# Git error messages.
 ERR_MSG_NO_BRANCH = 'fatal: ref HEAD is not a symbolic ref'
 ERR_MSG_UNKNOWN_OPTION_SHORT = "error: unknown option `short'"
 
@@ -60,11 +63,11 @@ def check_before_running():
 def main():
     #check_before_running()
 
-    # git top directory
+    # Git top directory.
     top_dir = run_cmd('git rev-parse --show-toplevel').strip()
     os.chdir(top_dir)
 
-    # branch
+    # Current branch name.
     branch = ''
     try:
         # Old version git does not suppoert the option --short.
@@ -84,7 +87,7 @@ def main():
         else:
             raise
 
-    # staged
+    # Count staged files.
     try:
         staged_files = run_cmd('git diff --staged --name-status').splitlines()
         staged_files = [namestat[0] for namestat in staged_files]
@@ -95,33 +98,33 @@ def main():
             if namestat[0] in ['U', 'M', 'A', 'D', 'R', 'C']:
                 staged_files.append(namestat[0])
 
-    # conflicts
+    # Count conflicts.
     conflicts = staged_files.count('U')
     if conflicts > 0:
         return 1
     staged = len(staged_files) - conflicts
 
-    # unstaged
+    # Count unstaged files.
     unstaged_files = run_cmd('git diff --name-status')
     unstaged_files = [namestat[0] for namestat in unstaged_files.splitlines()]
     unstaged = len(unstaged_files) - unstaged_files.count('U')
 
-    # untracked
+    # Count untracked files.
     untracked_files = run_cmd('git ls-files --others --exclude-standard')
     untracked_files = untracked_files.splitlines()
     untracked = len(untracked_files)
 
-    # stash
+    # Count stashed files.
     stash_list = run_cmd('git stash list')
     stashed = len(stash_list.splitlines())
 
-    # checking clean
+    # Check if clean.
     if not unstaged and not staged and not conflicts and not untracked:
         clean = '1'
     else:
         clean = '0'
 
-    # remote
+    # Count difference commits between the current branch and the remote branch.
     ahead = '0'
     behind = '0'
     head_branch = run_cmd('git symbolic-ref HEAD').strip()

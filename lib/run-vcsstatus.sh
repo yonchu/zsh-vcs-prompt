@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 ## The exe directory.
-cwd=$(cd $(dirname $0) && pwd)
+cwd=$(cd "$(dirname "$0")" && pwd)
 
 source $cwd/vcsstatus.sh
 

@@ -11,6 +11,7 @@
 #    2.Add the following in your .zshrc:
 #      # e.g.
 #      RPROMPT='$(vcs_super_info)'
+#      ZSH_VCS_PROMPT_ENABLE_CACHING='true'
 #
 ###############################################################################
 
@@ -39,7 +40,7 @@ ZSH_VCS_PROMPT_ENABLE_CACHING=${ZSH_VCS_PROMPT_ENABLE_CACHING:-'false'}
 ## Use the python script (lib/gitstatus-fast.py) by default.
 ZSH_VCS_PROMPT_USING_PYTHON=${ZSH_VCS_PROMPT_USING_PYTHON:-'true'}
 
-## The branch name to print no merge commit count.
+## The branch name to print unmerged commits count.
 #  If not set, don't print count.
 ZSH_VCS_PROMPT_MERGE_BRANCH=${ZSH_VCS_PROMPT_MERGE_BRANCH:-'master'}
 export ZSH_VCS_PROMPT_MERGE_BRANCH
@@ -188,7 +189,7 @@ fi
 
 # Setup logging.
 ZSH_VCS_PROMPT_LOG_FILE="$ZSH_VCS_PROMPT_DIR/zsh-vcs-prompt.log"
-ZSH_VCS_PROMPT_ERROR_COUNT='0'
+ZSH_VCS_PROMPT_ERROR_COUNT=0
 function _zsh_vcs_prompt_check_log_file() {
     if [ "$ZSH_VCS_PROMPT_LOGGING_LEVEL" != '1' ]; then
         return
@@ -264,10 +265,11 @@ function _zsh_vcs_prompt_precmd_hook_func() {
 
 function _zsh_vcs_prompt_update_vcs_status() {
     # Parse raw data.
-    local raw_data="$(vcs_super_info_raw_data)"
+    local raw_data
+    raw_data=$(vcs_super_info_raw_data)
     if [ -z "$raw_data" ]; then
-        ZSH_VCS_PROMPT_VCS_STATUS=''
-        return 0
+        ZSH_VCS_PROMPT_VCS_STATUS=
+        return
     fi
 
     local -a vcs_status
@@ -295,22 +297,22 @@ function _zsh_vcs_prompt_update_vcs_status() {
     # Select formats.
     local used_formats
     if [ "$vcs_name" = 'git' ]; then
-        used_formats="$ZSH_VCS_PROMPT_GIT_ACTION_FORMATS"
+        used_formats=$ZSH_VCS_PROMPT_GIT_ACTION_FORMATS
         # Check action.
         if [ -z "$action" -o "$action" = '0' ]; then
-            action=''
+            action=
             if [ "$using_python" = '1' -a -n "$ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON" ]; then
-                used_formats="$ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON"
+                used_formats=$ZSH_VCS_PROMPT_GIT_FORMATS_USING_PYTHON
             else
-                used_formats="$ZSH_VCS_PROMPT_GIT_FORMATS"
+                used_formats=$ZSH_VCS_PROMPT_GIT_FORMATS
             fi
         fi
     else
-        used_formats="$ZSH_VCS_PROMPT_VCS_ACTION_FORMATS"
+        used_formats=$ZSH_VCS_PROMPT_VCS_ACTION_FORMATS
         # Check action.
         if [ -z "$action" -o "$action" = '0' ]; then
-            action=''
-            used_formats="$ZSH_VCS_PROMPT_VCS_FORMATS"
+            action=
+            used_formats=$ZSH_VCS_PROMPT_VCS_FORMATS
         fi
     fi
 
@@ -330,9 +332,9 @@ function _zsh_vcs_prompt_update_vcs_status() {
     untracked=$(_zsh_vcs_prompt_set_sigil "$untracked" "$ZSH_VCS_PROMPT_UNTRACKED_SIGIL")
     stashed=$(_zsh_vcs_prompt_set_sigil "$stashed" "$ZSH_VCS_PROMPT_STASHED_SIGIL")
     if [ "$clean" = '1' ]; then
-        clean="$ZSH_VCS_PROMPT_CLEAN_SIGIL"
+        clean=$ZSH_VCS_PROMPT_CLEAN_SIGIL
     elif [ "$clean" = '0' ]; then
-        clean=''
+        clean=
     fi
 
     # Compose prompt status.
@@ -392,17 +394,13 @@ function vcs_super_info_raw_data() {
     if [ "$ZSH_VCS_PROMPT_USING_PYTHON" = 'true' ] \
         && type python > /dev/null 2>&1 \
         && type git > /dev/null 2>&1 \
-        && [ "$(command git rev-parse --is-inside-work-tree 2> /dev/null)" = "true" ]; then
+        && [ "$(command git rev-parse --is-inside-work-tree 2> /dev/null)" = 'true' ]; then
 
-        # Check python command.
+        # The python script to get git status.
         local cmd_gitstatus="${ZSH_VCS_PROMPT_DIR}/lib/gitstatus-fast.py"
-        if [ ! -f "$cmd_gitstatus" ]; then
-            echo "[ zsh-vcs-prompt error: ${ZSH_VCS_PROMPT_DIR}/lib/gitstatus-fast.py is not found ]" 1>&2
-            return 1
-        fi
-
         # Get vcs status.
-        local git_status="$(python "$cmd_gitstatus")"
+        local git_status
+        git_status=$(python "$cmd_gitstatus")
         if [ -n "$git_status" ];then
             using_python=1
             local vcs_name='git'
@@ -416,20 +414,18 @@ function vcs_super_info_raw_data() {
         fi
     fi
 
-    # Don't use python.
+    # When don't use python or error occurs in the python scritp.
     local vcs_status
 
     if type _zsh_vcs_prompt_vcs_detail_info > /dev/null 2>&1; then
+        ## zsh
         # Run the sourced function.
         vcs_status="$(_zsh_vcs_prompt_vcs_detail_info)"
     else
+        ## bash
         # Run the external script
         local cmd_run_vcsstatus="${ZSH_VCS_PROMPT_DIR}/lib/run-vcsstatus.sh"
-        if [ ! -f "$cmd_run_vcsstatus" ]; then
-            echo "[ zsh-vcs-prompt error: ${ZSH_VCS_PROMPT_DIR}/lib/run-vcsstatus.sh is not found ]" 1>&2
-            return 1
-        fi
-        vcs_status="$("$cmd_run_vcsstatus")"
+        vcs_status=$("$cmd_run_vcsstatus")
     fi
 
     if [ -z "$vcs_status" ]; then
