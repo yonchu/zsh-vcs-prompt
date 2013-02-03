@@ -30,9 +30,13 @@ fi
 
 ## Logging level.
 #   2:Output error to stderr.
-#   1:Output error to a file.
+#   1:Output error to the file (ZSH_VCS_PROMPT_DIR/zsh-vcs-prompt.log).
 #   O/W:Suppress error .
 ZSH_VCS_PROMPT_LOGGING_LEVEL=${ZSH_VCS_PROMPT_LOGGING_LEVEL:-''}
+
+## Threshold micro sec to logging running time of zsh-vcs-prompt.
+#  If not set, don't print and measure running time.
+ZSH_VCS_PROMPT_LOGGING_THRESHOLD_MICRO_SEC=${ZSH_VCS_PROMPT_LOGGING_THRESHOLD_MICRO_SEC:-''}
 
 ## Enable caching, if set 'true'.
 ZSH_VCS_PROMPT_ENABLE_CACHING=${ZSH_VCS_PROMPT_ENABLE_CACHING:-'false'}
@@ -264,6 +268,10 @@ function _zsh_vcs_prompt_precmd_hook_func() {
 }
 
 function _zsh_vcs_prompt_update_vcs_status() {
+    if [ -n "$ZSH_VCS_PROMPT_LOGGING_THRESHOLD_MICRO_SEC" ]; then
+        local start=$("$ZSH_VCS_PROMPT_DIR/lib/curret_time.pl")
+    fi
+
     # Parse raw data.
     local raw_data
     raw_data=$(vcs_super_info_raw_data)
@@ -353,6 +361,27 @@ function _zsh_vcs_prompt_update_vcs_status() {
         -e "s/#j/$clean/")
 
     ZSH_VCS_PROMPT_VCS_STATUS=$prompt_info
+
+    # Check running time.
+    if [ -n "$ZSH_VCS_PROMPT_LOGGING_THRESHOLD_MICRO_SEC" ]; then
+        local end=$("$ZSH_VCS_PROMPT_DIR/lib/curret_time.pl")
+        local elapse=$(($end - $start))
+        if [ "$elapse" -gt "$ZSH_VCS_PROMPT_LOGGING_THRESHOLD_MICRO_SEC" ]; then
+            elapse=$(_zsh_vcs_prompt_microsec2datetime "$elapse")
+            echo "[zsh-vcs-prompt][$(date +'%D %H:%M:%S')] Running time: $elapse ($(pwd))" 1>&2
+        fi
+    fi
+}
+
+function _zsh_vcs_prompt_microsec2datetime() {
+    local elapse=$1
+    local mc=$(($elapse % 1000000))
+    local elapse_sec=$(($elapse / 1000000))
+    local hh=$(($elapse_sec / 3600))
+    local ss=$(($elapse_sec % 3600))
+    local mm=$(($elapse_sec / 60))
+    local ss=$(($elapse_sec % 60))
+    echo "$hh:$mm:$ss.$mc"
 }
 
 # Helper function to set sigil.
