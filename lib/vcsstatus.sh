@@ -198,7 +198,7 @@ function _zsh_vcs_prompt_get_git_status() {
 
     # Count unmerged commits.
     if [ -n "$ZSH_VCS_PROMPT_MERGE_BRANCH" -a "$branch_name" != "$ZSH_VCS_PROMPT_MERGE_BRANCH" ]; then
-        unmerged=$(command git rev-list "$ZSH_VCS_PROMPT_MERGE_BRANCH".."$branch_name" | wc -l | tr -d ' ')
+        unmerged=$(command git rev-list "$ZSH_VCS_PROMPT_MERGE_BRANCH".."${branch_name%'...'}" | wc -l | tr -d ' ')
     fi
 
     # Output result.
