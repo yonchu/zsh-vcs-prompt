@@ -29,23 +29,25 @@ def run_cmd(cmd, ignore_error=False, exargs=None):
     if not ignore_error:
         check_error(error, p.returncode)
     if out:
-        if isinstance(out, bytes):
-            out = out.decode('utf-8')
-        return str(out.encode('utf-8'))
+        try:
+            out = str(out, 'utf-8')
+        except TypeError:
+            pass
+        return out
     return ''
 
 
 def check_error(error, returncode=1):
     if returncode == 0:
         return
-    message = ''
     if error:
-        if isinstance(error, bytes):
-            error = error.decode('utf-8')
-        message = str(error)
+        try:
+            error = str(error, 'utf-8')
+        except TypeError:
+            pass
     else:
-        message = 'Unknown error'
-    message = 'Error(%d): %s' % (returncode, message)
+        error = 'Unknown error'
+    message = 'Error(%d): %s' % (returncode, error)
     raise Exception(message)
 
 
@@ -128,8 +130,8 @@ def main():
     ahead = '0'
     behind = '0'
     head_branch = run_cmd('git symbolic-ref HEAD').strip()
-    tracking_branch = run_cmd('git for-each-ref --format="%(upstream:short)" '
-                              + head_branch, ignore_error=True).strip()
+    tracking_branch = run_cmd('git for-each-ref --format="%%(upstream:short)" %s'
+                              % head_branch, ignore_error=True).strip()
     if tracking_branch:
         try:
             behind_ahead = run_cmd('git rev-list --left-right --count %s...HEAD'
