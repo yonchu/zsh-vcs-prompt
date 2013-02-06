@@ -429,7 +429,7 @@ function vcs_super_info_raw_data() {
         local cmd_gitstatus="${ZSH_VCS_PROMPT_DIR}/lib/gitstatus-fast.py"
         # Get vcs status.
         local git_status
-        git_status=$(python "$cmd_gitstatus")
+        git_status=$(python -E "$cmd_gitstatus")
         if [ -n "$git_status" ];then
             using_python=1
             local vcs_name='git'
