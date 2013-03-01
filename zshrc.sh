@@ -180,7 +180,14 @@ else
 
     ## Initialize.
     ## The exe directory.
-    ZSH_VCS_PROMPT_DIR=$(cd "$(dirname "$0")" && pwd)
+    autoload -U is-at-least
+    if is-at-least 4.3.10; then
+        # "A" flag (turn a file name into an absolute path with symlink
+        # resolution) is only available on 4.3.10 and latter
+        ZSH_VCS_PROMPT_DIR="${${funcsourcetrace[1]%:*}:A:h}"
+    else
+        ZSH_VCS_PROMPT_DIR="${${funcsourcetrace[1]%:*}:h}"
+    fi
 
     ## Source "lib/vcsstatus*.sh".
     # Enable to use the function _zsh_vcs_prompt_vcs_detail_info
