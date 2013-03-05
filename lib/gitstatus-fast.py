@@ -19,83 +19,124 @@ ERR_MSG_NO_BRANCH = 'fatal: ref HEAD is not a symbolic ref'
 ERR_MSG_UNKNOWN_OPTION_SHORT = "error: unknown option `short'"
 
 
-def run_cmd(cmd, ignore_error=False, exargs=None):
-    cmd = shlex.split(cmd)
-    if exargs:
-        cmd.extend(exargs)
-    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-    out, error = p.communicate()
+class Cmd(object):
+    def __init__(self, cmd, exargs=None, ignore_error=False):
+        self.ignore_error = ignore_error
+        cmd = shlex.split(cmd)
+        if exargs:
+            cmd.extend(exargs)
+        self.cmd = cmd
+        self.process = Popen(self.cmd, stdout=PIPE, stderr=PIPE)
 
-    if not ignore_error:
-        check_error(error, p.returncode)
-    if out:
-        try:
-            out = str(out, 'utf-8')
-        except TypeError:
-            pass
-        return out
-    return ''
+    def get_result(self):
+        out, error = self.process.communicate()
+        if not self.ignore_error:
+            self._check_error(error)
+        if out:
+            try:
+                out = str(out, 'utf-8')
+            except TypeError:
+                pass
+            return out
+        return ''
 
-
-def check_error(error, returncode=1):
-    if returncode == 0:
-        return
-    if error:
-        try:
-            error = str(error, 'utf-8')
-        except TypeError:
-            pass
-    else:
-        error = 'Unknown error'
-    message = 'Error(%d): %s' % (returncode, error)
-    raise Exception(message)
+    def _check_error(self, error):
+        returncode = self.process.returncode
+        if returncode == 0:
+            return
+        if error:
+            try:
+                error = str(error, 'utf-8')
+            except TypeError:
+                pass
+        else:
+            error = 'Unknown error'
+        message = 'Error(%d): %s' % (returncode, error)
+        raise Exception(message)
 
 
 def check_before_running():
     try:
         check_call('type git >/dev/null 2>&1', shell=True)
     except CalledProcessError as e:
-        check_error('Git is not installed', e.returncode)
+        info = sys.exc_info()
+        raise Exception('Git is not installed (%s)\n%s: %s'
+                        % (e.returncode, info[0].__name__, info[1]))
 
-    output = run_cmd('git rev-parse --is-inside-work-tree')
+    output = Cmd('git rev-parse --is-inside-work-tree').get_result()
     if output == 'false':
-        check_error('Not inside git work tree')
+        raise Exception('Not inside git work tree')
 
 
 def main():
     #check_before_running()
 
-    # Git top directory.
-    top_dir = run_cmd('git rev-parse --show-toplevel').strip()
-    os.chdir(top_dir)
+    # Start proess to get full name of the current branch (like refs/heads/master).
+    p_branch_ref = Cmd('git symbolic-ref HEAD')
+    # Start process to get the git top directory.
+    p_top_dir = Cmd('git rev-parse --show-toplevel')
+    # Start proess to get the current branch name.
+    p_branch = Cmd('git symbolic-ref --short HEAD')
 
-    # Current branch name.
+    # Get full name of the current barnch (like refs/heads/master).
+    try:
+        branch_ref = p_branch_ref.get_result().strip()
+    except Exception as e:
+        if ERR_MSG_NO_BRANCH in str(e):
+            # If not on any branch.
+            return 1
+        raise
+
+    # Start proess to get the tracking branch.
+    p_tracking_branch = Cmd('git for-each-ref --format="%%(upstream:short)" %s'
+                            % branch_ref, ignore_error=True)
+
+    # Get merge branch from environmental variable.
+    merge_branch = ENV_MERGE_BRANCH in os.environ \
+        and os.environ[ENV_MERGE_BRANCH]
+
+    # Change directory to git top.
+    os.chdir(p_top_dir.get_result().strip())
+
+    # Get the current branch name.
     branch = ''
     try:
         # Old version git does not suppoert the option --short.
-        branch = run_cmd('git symbolic-ref --short HEAD').strip()
+        branch = p_branch.get_result().strip()
     except Exception as e:
         if ERR_MSG_NO_BRANCH in str(e):
             # If not on any branch.
             return 1
         elif ERR_MSG_UNKNOWN_OPTION_SHORT in str(e):
-            # If the option --short is unsupported.
-            try:
-                branch = run_cmd('git symbolic-ref HEAD').strip()[11:]
-            except Exception as ex:
-                if ERR_MSG_NO_BRANCH in str(ex):
-                    # If not on any branch.
-                    return 1
+            branch = branch_ref[11:]
         else:
             raise
 
+    # Get the tracking branch.
+    tracking_branch = p_tracking_branch.get_result().strip()
+
+    # Start processes.
+    p_staged_files = Cmd('git diff --staged --name-status')
+    p_unstaged_files = Cmd('git diff --name-status')
+    p_untracked_files = Cmd('git ls-files --others --exclude-standard')
+    p_stash_list = Cmd('git stash list')
+
+    p_unmerged_list = None
+    if merge_branch and not branch == merge_branch:
+        p_unmerged_list = Cmd('git rev-list %s..%s' % (merge_branch, branch))
+
+    p_behind_ahead = None
+    if tracking_branch:
+        p_behind_ahead = Cmd('git rev-list --left-right --count %s...HEAD'
+                             % tracking_branch)
+
     # Count staged files.
     try:
-        staged_files = run_cmd('git diff --staged --name-status').splitlines()
+        staged_files = p_staged_files.get_result().splitlines()
         staged_files = [namestat[0] for namestat in staged_files]
     except:
         staged_files = []
-        git_status = run_cmd('git status --short --porcelain').splitlines()
+        git_status = Cmd('git status --short --porcelain').get_result().splitlines()
         for namestat in git_status:
             if namestat[0] in ['U', 'M', 'A', 'D', 'R', 'C']:
                 staged_files.append(namestat[0])
@@ -107,17 +148,17 @@ def main():
     staged = len(staged_files) - conflicts
 
     # Count unstaged files.
-    unstaged_files = run_cmd('git diff --name-status')
+    unstaged_files = p_unstaged_files.get_result()
     unstaged_files = [namestat[0] for namestat in unstaged_files.splitlines()]
     unstaged = len(unstaged_files) - unstaged_files.count('U')
 
     # Count untracked files.
-    untracked_files = run_cmd('git ls-files --others --exclude-standard')
+    untracked_files = p_untracked_files.get_result()
     untracked_files = untracked_files.splitlines()
     untracked = len(untracked_files)
 
     # Count stashed files.
-    stash_list = run_cmd('git stash list')
+    stash_list = p_stash_list.get_result()
     stashed = len(stash_list.splitlines())
 
     # Check if clean.
@@ -129,29 +170,22 @@ def main():
     # Count difference commits between the current branch and the remote branch.
     ahead = '0'
     behind = '0'
-    head_branch = run_cmd('git symbolic-ref HEAD').strip()
-    tracking_branch = run_cmd('git for-each-ref --format="%%(upstream:short)" %s'
-                              % head_branch, ignore_error=True).strip()
-    if tracking_branch:
+    if p_behind_ahead:
         try:
-            behind_ahead = run_cmd('git rev-list --left-right --count %s...HEAD'
-                                   % tracking_branch).split()
+            behind_ahead = p_behind_ahead.get_result().split()
             behind = behind_ahead[0]
             ahead = behind_ahead[1]
         except:
             # If the option --count is unsupported.
-            behind_ahead = run_cmd('git rev-list --left-right %s...HEAD'
-                                   % tracking_branch).splitlines()
+            behind_ahead = Cmd('git rev-list --left-right %s...HEAD'
+                               % tracking_branch).get_result().splitlines()
             ahead = len([x for x in behind_ahead if x[0] == '>'])
             behind = len(behind_ahead) - ahead
 
     # Count unmerged commits.
     unmerged = '0'
-    merge_branch = ENV_MERGE_BRANCH in os.environ \
-        and os.environ[ENV_MERGE_BRANCH]
-    if merge_branch and not branch == merge_branch:
-        unmerged_list = run_cmd('git rev-list %s..%s'
-                                % (merge_branch, branch)).splitlines()
+    if p_unmerged_list:
+        unmerged_list = p_unmerged_list.get_result().splitlines()
         unmerged = len(unmerged_list)
 
     # Result
