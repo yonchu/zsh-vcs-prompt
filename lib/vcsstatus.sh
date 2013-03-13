@@ -35,7 +35,7 @@ zstyle ':vcs_info:*' max-exports 5
 
 # To be enable check-for-changes with hg.
 zstyle ':vcs_info:hg:*' get-revision true
-zstyle ':vcs_info:(hg|bzr):*' use-simple true
+zstyle ':vcs_info:(git|hg|bzr):*' use-simple true
 
 ## Set formats.
 #
