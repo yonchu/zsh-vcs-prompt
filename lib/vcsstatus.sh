@@ -24,7 +24,9 @@
 #  http://d.hatena.ne.jp/pasela/20110216/git_not_pushed
 #  http://liosk.blog103.fc2.com/blog-entry-209.html
 #  http://qiita.com/items/8d5a627d773758dd8078
-autoload -Uz vcs_info || return 1
+if ! type vcs_info > /dev/null 2>&1; then
+    autoload -Uz vcs_info || return 1
+fi
 zstyle ':vcs_info:*' enable git svn hg bzr
 
 # Specify the command path to git used by VCS_INFO.
@@ -56,7 +58,9 @@ zstyle ':vcs_info:(git|hg):*' check-for-changes false
 
 
 # Check zsh version.
-autoload -Uz is-at-least
+if ! type is-at-least > /dev/null 2>&1; then
+    autoload -Uz is-at-least
+fi
 if is-at-least 4.3.11; then
     # Register the hook function.
     zstyle ':vcs_info:git+set-message:*' hooks git-hook-detail-info

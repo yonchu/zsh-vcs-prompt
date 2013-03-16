@@ -180,7 +180,9 @@ else
 
     ## Initialize.
     ## The exe directory.
-    autoload -U is-at-least
+    if ! type is-at-least > /dev/null 2>&1; then
+        autoload -Uz is-at-least
+    fi
     if is-at-least 4.3.10; then
         # "A" flag (turn a file name into an absolute path with symlink
         # resolution) is only available on 4.3.10 and latter
@@ -189,13 +191,19 @@ else
         ZSH_VCS_PROMPT_DIR="${${funcsourcetrace[1]%:*}:h}"
     fi
 
+    if [ -z "$colors" ]; then
+        autoload -Uz colors && colors
+    fi
+
     ## Source "lib/vcsstatus*.sh".
     # Enable to use the function _zsh_vcs_prompt_vcs_detail_info
     source $ZSH_VCS_PROMPT_DIR/lib/vcsstatus.sh
 
     # Register precmd hook function
-    autoload -Uz add-zsh-hook \
-        && add-zsh-hook precmd _zsh_vcs_prompt_precmd_hook_func
+    if ! type add-zsh-hook > /dev/null 2>&1; then
+        autoload -Uz add-zsh-hook
+    fi
+    add-zsh-hook precmd _zsh_vcs_prompt_precmd_hook_func
 fi
 
 # Setup logging.
