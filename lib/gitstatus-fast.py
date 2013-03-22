@@ -17,6 +17,9 @@ ENV_MERGE_BRANCH = 'ZSH_VCS_PROMPT_MERGE_BRANCH'
 # Git error messages.
 ERR_MSG_NO_BRANCH = 'fatal: ref HEAD is not a symbolic ref'
 ERR_MSG_UNKNOWN_OPTION_SHORT = "error: unknown option `short'"
+ERRO_MSG_AMBIGUOUS_ARGUMENT = \
+    "fatal: ambiguous argument '%s..%s': " \
+    + "unknown revision or path not in the working tree."
 
 
 class Cmd(object):
@@ -185,8 +188,14 @@ def main():
     # Count unmerged commits.
     unmerged = '0'
     if p_unmerged_list:
-        unmerged_list = p_unmerged_list.get_result().splitlines()
-        unmerged = len(unmerged_list)
+        try:
+            unmerged_list = p_unmerged_list.get_result().splitlines()
+        except Exception as e:
+            err_msg = ERRO_MSG_AMBIGUOUS_ARGUMENT % (merge_branch, branch)
+            if not err_msg in str(e):
+                raise
+        else:
+            unmerged = len(unmerged_list)
 
     # Result
     out = '\n'.join([
