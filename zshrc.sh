@@ -31,7 +31,7 @@ fi
 ## Logging level.
 #   2:Output error to stderr.
 #   1:Output error to the file (ZSH_VCS_PROMPT_DIR/zsh-vcs-prompt.log).
-#   O/W:Suppress error .
+#   O/W:Suppress all errors.
 ZSH_VCS_PROMPT_LOGGING_LEVEL=${ZSH_VCS_PROMPT_LOGGING_LEVEL:-''}
 
 ## Threshold micro sec to logging running time of zsh-vcs-prompt.
