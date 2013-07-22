@@ -180,9 +180,7 @@ else
 
     ## Initialize.
     ## The exe directory.
-    if ! (( $+functions[is-at-least] )) ; then
-        autoload -Uz is-at-least
-    fi
+    autoload -Uz +X is-at-least
     if is-at-least 4.3.10; then
         # "A" flag (turn a file name into an absolute path with symlink
         # resolution) is only available on 4.3.10 and latter
@@ -192,7 +190,8 @@ else
     fi
 
     if [ -z "$colors" ]; then
-        autoload -Uz colors && colors
+        autoload -Uz +X colors
+        colors
     fi
 
     ## Source "lib/vcsstatus*.sh".
@@ -200,9 +199,7 @@ else
     source $ZSH_VCS_PROMPT_DIR/lib/vcsstatus.sh
 
     # Register precmd hook function
-    if ! (( $+functions[add-zsh-hook] )) ; then
-        autoload -Uz add-zsh-hook
-    fi
+    autoload -Uz +X add-zsh-hook
     add-zsh-hook precmd _zsh_vcs_prompt_precmd_hook_func
 fi
 
