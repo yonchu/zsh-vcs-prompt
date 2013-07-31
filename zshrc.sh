@@ -294,7 +294,11 @@ function _zsh_vcs_prompt_update_vcs_status() {
 
     local -a vcs_status
     if [ -n "$BASH_VERSION" ]; then
-        IFS=$'\n' vcs_status=($raw_data)
+        local IFS_SAVE
+        IFS_SAVE=$IFS
+        IFS=$'\n'
+        vcs_status=($raw_data)
+        IFS=$IFS_SAVE
         vcs_status=("" "${vcs_status[@]}")
     else
         vcs_status=("${(f)raw_data}")
