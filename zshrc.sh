@@ -341,7 +341,7 @@ function _zsh_vcs_prompt_update_vcs_status() {
     fi
 
     # Escape slash '/'.
-    branch=$(echo "$branch" | sed 's%/%\\/%')
+    branch=$(echo "$branch" | sed 's%/%\\/%g')
     # Set unmerged count.
     if [ -n "$unmerged" -a "$unmerged" != '0' ]; then
         branch="${branch}(${unmerged})"
